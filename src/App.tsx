@@ -362,7 +362,6 @@ function App() {
       <main className="home-page">
         <section className="intro-hero" aria-labelledby="intro-title">
           <div className="intro-copy">
-            <p className="eyebrow hero-eyebrow"><span /> A multilingual helper for migrant workers in Kerala</p>
             <h1 id="intro-title">Support for your work and life in Kerala.<br /><em>In your language.</em></h1>
             <p className="intro-summary">Sahaayi is a voice and chat helper for migrant workers living and working in Kerala. Understand benefits, solve workplace problems and find the right official or community support.</p>
             <label className="hero-language-select"><span>Start in your language</span><select value={language.name} onChange={(event) => { const selected = languages.find((item) => item.name === event.target.value); if (selected) changeLanguage(selected) }}>{languages.map((item) => <option key={item.name} value={item.name}>{item.label} · {item.name}</option>)}</select></label>
@@ -466,7 +465,7 @@ function App() {
         <button type="button" className="brand" onClick={() => setPage('home')} aria-label="Sahaayi home"><img className="brand-logo" src="/icons/sahaayi-icon.svg" alt="" /><span>Sahaayi</span></button>
         <div className="top-actions">
           <div className="language-menu notranslate" translate="no">
-            <button className="language-switch" type="button" onClick={() => setLanguageOpen((open) => !open)}><span className="language-icon">◎</span><span className="language-copy"><small>Language</small><strong>{language.label}<span className="hide-on-small"> · {language.name}</span></strong></span><span>⌄</span></button>
+            <button className="language-switch" type="button" onClick={() => setLanguageOpen((open) => !open)}><span className="language-icon"><img src="/images/translate.png" alt="" /></span><span className="language-copy"><small>Language</small><strong>{language.label}<span className="hide-on-small"> · {language.name}</span></strong></span><span>⌄</span></button>
             {isLanguageOpen && <div className="language-popover">{languages.map((item) => <button type="button" key={item.name} onClick={() => changeLanguage(item)}><span>{item.label}</span>{item.name === language.name && <span>✓</span>}<small>{item.name}</small></button>)}</div>}
           </div>
           <button type="button" className="emergency-link" onClick={() => setResult(resultForIssue('injury'))}><span>✚</span><span className="hide-on-small">Urgent help</span></button>
