@@ -5,7 +5,6 @@ type SahaayiEnv = {
   BOLNA_AGENT_ID?: string
   BOLNA_FROM_PHONE_NUMBER?: string
   BOLNA_FUNCTION_TOKEN?: string
-  SAHAAYI_PHONE_NUMBER?: string
   OPENAI_API_KEY?: string
   OPENAI_MODEL?: string
 }
@@ -155,10 +154,6 @@ export default {
         voiceReady: Boolean(env.BOLNA_API_KEY && env.BOLNA_AGENT_ID),
         openAIReady: Boolean(env.OPENAI_API_KEY),
       })
-    }
-
-    if (url.pathname === '/api/public-config') {
-      return json({ supportPhoneNumber: env.SAHAAYI_PHONE_NUMBER ?? '' })
     }
 
     if (url.pathname === '/api/help' && request.method === 'POST') {

@@ -9,7 +9,7 @@ It helps a worker explain a need in their own language, understand the right nex
 - Mobile-first worker experience with Bengali, Hindi, Malayalam, and English language selection
 - Broad worker-helper journeys: benefits, wage support, injury/health help, registration, documents, and hospital navigation
 - Guided support escalation with a worker review step
-- Call-the-agent and callback-request entry points, with safe demo fallbacks until Bolna is configured
+- A callback-request entry point that lets the Bolna voice agent call the worker, with safe demo fallbacks until it is configured
 - Demo case status tracking and a caseworker dashboard
 - Cloudflare Worker API routes for health checks, a Bolna case handoff, and service-directory data
 - Progressive Web App metadata and offline shell
@@ -41,7 +41,6 @@ Do not commit `.dev.vars`. For Cloudflare deployment, add secrets with `npx wran
 | `BOLNA_AGENT_ID` | To connect the worker voice experience to the configured Bolna agent |
 | `BOLNA_FROM_PHONE_NUMBER` | The E.164 caller ID Bolna should use when calling a worker back |
 | `BOLNA_FUNCTION_TOKEN` | A long random value configured as the Bearer token on Bolna custom functions that call Sahaayi |
-| `SAHAAYI_PHONE_NUMBER` | Public E.164 support line rendered as the app’s `tel:` link; this is not a secret |
 | `OPENAI_API_KEY` | OpenAI key for the browser-helper fallback and structured support guidance |
 | `OPENAI_MODEL` | Optional model override; defaults to `gpt-5.6-luna` in this project |
 | `SUPABASE_URL` | To store real cases, conversations, and the verified service directory |
@@ -70,14 +69,11 @@ Do not commit `.dev.vars`. For Cloudflare deployment, add secrets with `npx wran
 
 ## Phone-call setup
 
-Sahaayi supports both:
-
-- **Call Sahaayi:** a worker dials the public number directly and Bolna routes the inbound call to the agent.
-- **Request a callback:** the PWA posts a phone number to `POST /api/callback`; the Cloudflare Worker calls Bolna’s Call API server-side.
+Sahaayi uses a callback-only experience: the worker enters a phone number and the PWA posts it to `POST /api/callback`. The Cloudflare Worker calls Bolna’s Call API server-side, which starts the configured voice agent’s outbound call.
 
 The callback endpoint sends `agent_id`, `recipient_phone_number`, optional `from_phone_number`, and worker context to Bolna. Do not call Bolna directly from the browser because the Bolna API key must remain secret.
 
-Before deploying, set up the phone number and agent mapping in Bolna, then add `BOLNA_API_KEY`, `BOLNA_AGENT_ID`, `BOLNA_FROM_PHONE_NUMBER`, and `SAHAAYI_PHONE_NUMBER` as Cloudflare secrets/variables.
+Before deploying, add `BOLNA_API_KEY` and `BOLNA_AGENT_ID` as Cloudflare secrets/variables. Add `BOLNA_FROM_PHONE_NUMBER` too if your Bolna setup requires an explicit caller ID.
 
 ## Important product boundary
 

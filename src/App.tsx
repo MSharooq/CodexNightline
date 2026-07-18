@@ -1,4 +1,4 @@
-import { FormEvent, useEffect, useMemo, useState } from 'react'
+import { FormEvent, useMemo, useState } from 'react'
 
 type Page = 'home' | 'cases' | 'documents' | 'profile' | 'dashboard'
 type Issue = 'unpaid_wages' | 'injury' | 'registration' | 'documents' | 'hospital' | 'benefits' | 'other'
@@ -168,20 +168,12 @@ function App() {
   const [showCaseSheet, setShowCaseSheet] = useState(false)
   const [caseDraft, setCaseDraft] = useState<HelpResult | null>(null)
   const [isCallbackOpen, setCallbackOpen] = useState(false)
-  const [supportPhoneNumber, setSupportPhoneNumber] = useState('')
   const [isThinking, setThinking] = useState(false)
   const [isChatOpen, setChatOpen] = useState(false)
   const [cases, setCases] = useState(initialCases)
   const [toast, setToast] = useState('')
 
   const caseCount = useMemo(() => cases.filter((item) => item.status !== 'Resolved').length, [cases])
-
-  useEffect(() => {
-    fetch('/api/public-config')
-      .then((response) => response.ok ? response.json() : null)
-      .then((config: { supportPhoneNumber?: string } | null) => setSupportPhoneNumber(config?.supportPhoneNumber ?? ''))
-      .catch(() => setSupportPhoneNumber(''))
-  }, [])
 
   const notify = (text: string) => {
     setToast(text)
@@ -283,14 +275,13 @@ function App() {
           </div>
         </section>
 
-        <section className="call-options" aria-label="Phone call options">
+        <section className="call-options" aria-label="Request a phone callback">
           <div className="call-options-copy">
             <span className="call-symbol">☎</span>
-            <div><strong>Talk to Sahaayi by phone</strong><p>{supportPhoneNumber ? 'Call the support line from any phone.' : 'The Sahaayi support line is being activated.'}</p></div>
+            <div><strong>Sahaayi can call you</strong><p>Enter a number you can answer and the voice assistant will call you back.</p></div>
           </div>
           <div className="call-options-actions">
-            {supportPhoneNumber ? <a className="call-now" href={`tel:${supportPhoneNumber}`}>Call now <span>→</span></a> : <span className="call-pending">Number coming soon</span>}
-            <button type="button" onClick={() => setCallbackOpen(true)}>Request a callback</button>
+            <button type="button" onClick={() => setCallbackOpen(true)}>Request a call <span>→</span></button>
           </div>
         </section>
 
