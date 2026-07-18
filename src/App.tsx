@@ -283,6 +283,19 @@ function App() {
           <button type="button" onClick={() => setChatOpen(true)}>Open chatbot <span>→</span></button>
         </section>
 
+        <section className="how-it-works" aria-labelledby="how-it-works-title">
+          <div className="how-it-works-heading">
+            <div><p className="eyebrow">How Sahaayi works</p><h2 id="how-it-works-title">One conversation. A clearer next step.</h2></div>
+            <span className="how-it-works-badge">Made for migrant workers</span>
+          </div>
+          <div className="flow-steps">
+            <article><span className="flow-number">01</span><span className="flow-icon">☎</span><h3>Speak or type</h3><p>Request a callback in your language, or use the chatbot when it is easier.</p></article>
+            <article><span className="flow-number">02</span><span className="flow-icon">✦</span><h3>Sahaayi understands</h3><p>Explain the problem naturally. Sahaayi identifies what support, information or evidence may help.</p></article>
+            <article><span className="flow-number">03</span><span className="flow-icon">↗</span><h3>Take the right next step</h3><p>Get a checklist, create a support request, or connect with the relevant service or support worker.</p></article>
+          </div>
+          <p className="how-it-works-note">Sahaayi helps you navigate existing support. It does not replace emergency, medical or legal services.</p>
+        </section>
+
         <section className="quick-section">
           <div className="section-heading">
             <div>
