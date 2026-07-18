@@ -27,6 +27,12 @@ type CallbackPayload = {
 type HelpPayload = {
   message?: string
   language?: string
+  history?: ChatHistoryItem[]
+}
+
+type ChatHistoryItem = {
+  role?: string
+  content?: string
 }
 
 const corsHeaders = {
@@ -60,12 +66,37 @@ function hasFunctionAccess(request: Request, token?: string) {
   return request.headers.get('Authorization') === `Bearer ${token}`
 }
 
-async function getOpenAIHelp(message: string, language: string, env: SahaayiEnv) {
+function demoAnswer(issueType: IssueType) {
+  const answers: Record<IssueType, string> = {
+    unpaid_wages: 'I can help you prepare a wage-support request. Keep any payment messages, work photos, attendance records, and contractor details you have. Would you like to request a callback so we can collect the details together?',
+    injury: 'Your safety comes first. If there is heavy bleeding, severe pain, trouble breathing, or immediate danger, go to the nearest hospital or seek emergency help now. Otherwise, I can help record what happened and find public health support.',
+    registration: 'I can explain registration in your language. Keep an identity document, Kerala address, and employer or worksite details ready if you have them. I can also arrange a callback to guide you through the official process.',
+    documents: 'Tell me which document is missing or being held. Do not share document numbers here. Keep a photo or note of any proof you already have, and Sahaayi can help identify a safe next step.',
+    hospital: 'I can help you find public health support near you. If the injury or illness is serious or immediate, please go to the nearest hospital or seek emergency help now.',
+    benefits: 'I can help you understand the next step for registration, worker welfare, health support, documents, or wages. Tell me what you need most today, and I will guide you in your language.',
+    other: 'I can help you find the next right step. Please tell me what happened, without sharing sensitive document or bank numbers. You can also request a callback to speak with Sahaayi.',
+  }
+  return answers[issueType]
+}
+
+function formatHistory(history: ChatHistoryItem[]) {
+  return history
+    .slice(-6)
+    .map((item) => {
+      const content = item.content?.trim().slice(0, 600)
+      if (!content) return ''
+      return `${item.role === 'assistant' ? 'Sahaayi' : 'Worker'}: ${content}`
+    })
+    .filter(Boolean)
+    .join('\n')
+}
+
+async function getOpenAIHelp(message: string, language: string, env: SahaayiEnv, history: ChatHistoryItem[] = []) {
   const issueType = detectIssue(message)
   if (!env.OPENAI_API_KEY) {
     return {
       issueType,
-      answer: 'Sahaayi is in demo mode right now. I can still guide you to the right support path; add the OpenAI key to receive an AI-generated explanation in the worker’s language.',
+      answer: demoAnswer(issueType),
       mode: 'demo',
     }
   }
@@ -88,7 +119,7 @@ async function getOpenAIHelp(message: string, language: string, env: SahaayiEnv)
     body: JSON.stringify({
       model: env.OPENAI_MODEL || 'gpt-5.6-luna',
       instructions,
-      input: message,
+      input: [formatHistory(history), `Worker: ${message}`].filter(Boolean).join('\n'),
       max_output_tokens: 280,
     }),
   })
@@ -135,7 +166,7 @@ export default {
       const message = payload.message?.trim().slice(0, 1_200)
       if (!message) return json({ error: 'Please tell Sahaayi what you need help with.' }, 400)
 
-      return json(await getOpenAIHelp(message, payload.language?.trim() || 'English', env))
+      return json(await getOpenAIHelp(message, payload.language?.trim() || 'English', env, payload.history ?? []))
     }
 
     if (url.pathname === '/api/callback' && request.method === 'POST') {

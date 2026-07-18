@@ -24,6 +24,12 @@ type HelpResult = {
   urgent?: boolean
 }
 
+type ChatMessage = {
+  id: string
+  role: 'assistant' | 'user'
+  content: string
+}
+
 const languages = [
   { label: 'বাংলা', name: 'Bengali' },
   { label: 'हिन्दी', name: 'Hindi' },
@@ -164,6 +170,7 @@ function App() {
   const [isCallbackOpen, setCallbackOpen] = useState(false)
   const [supportPhoneNumber, setSupportPhoneNumber] = useState('')
   const [isThinking, setThinking] = useState(false)
+  const [isChatOpen, setChatOpen] = useState(false)
   const [cases, setCases] = useState(initialCases)
   const [toast, setToast] = useState('')
 
@@ -370,9 +377,66 @@ function App() {
       }} />}
       {showCaseSheet && <CaseSheet result={caseDraft} onClose={() => { setShowCaseSheet(false); setCaseDraft(null) }} onCreate={createCase} />}
       {isCallbackOpen && <CallbackSheet language={language.name} onClose={() => setCallbackOpen(false)} onSuccess={(message) => { setCallbackOpen(false); notify(message) }} />}
+      {page !== 'dashboard' && <button type="button" className="chat-launcher" onClick={() => setChatOpen(true)} aria-label="Open Sahaayi chat"><span>✦</span><strong>Chat with Sahaayi</strong></button>}
+      {isChatOpen && <Chatbot language={language.name} onClose={() => setChatOpen(false)} onRequestCallback={() => { setChatOpen(false); setCallbackOpen(true) }} />}
       {toast && <div className="toast" role="status">✓ {toast}</div>}
     </div>
   )
+}
+
+function Chatbot({ language, onClose, onRequestCallback }: { language: string; onClose: () => void; onRequestCallback: () => void }) {
+  const [messages, setMessages] = useState<ChatMessage[]>([
+    { id: 'welcome', role: 'assistant', content: `Hi, I’m Sahaayi. You can ask me about benefits, wages, registration, documents, or health support. I’ll reply in ${language}.` },
+  ])
+  const [input, setInput] = useState('')
+  const [isSending, setSending] = useState(false)
+
+  const sendMessage = async (text: string) => {
+    const message = text.trim()
+    if (!message || isSending) return
+    const userMessage: ChatMessage = { id: `user-${messages.length}`, role: 'user', content: message }
+    const history = messages.slice(-6).map(({ role, content }) => ({ role, content }))
+    setMessages((current) => [...current, userMessage])
+    setInput('')
+    setSending(true)
+    try {
+      const response = await fetch('/api/help', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message, language, history }),
+      })
+      const data = await response.json() as { answer?: unknown }
+      const answer = typeof data.answer === 'string' && data.answer.trim()
+        ? data.answer
+        : 'I can help you find the next right step. Could you tell me a little more?'
+      setMessages((current) => [...current, { id: `assistant-${current.length}`, role: 'assistant', content: answer }])
+    } catch {
+      setMessages((current) => [...current, { id: `assistant-${current.length}`, role: 'assistant', content: 'I’m having trouble connecting right now. You can still request a callback and speak to Sahaayi by phone.' }])
+    } finally {
+      setSending(false)
+    }
+  }
+
+  const submitChat = (event: FormEvent) => {
+    event.preventDefault()
+    void sendMessage(input)
+  }
+
+  return <aside className="chat-panel" role="dialog" aria-modal="false" aria-label="Chat with Sahaayi">
+    <header className="chat-header"><div><span className="chat-avatar">✦</span><div><strong>Sahaayi</strong><small>Here to help in {language}</small></div></div><button type="button" onClick={onClose} aria-label="Close chat">×</button></header>
+    <div className="chat-messages" aria-live="polite">
+      {messages.map((message) => <div className={`chat-message ${message.role}`} key={message.id}>{message.content}</div>)}
+      {isSending && <div className="chat-message assistant typing" aria-label="Sahaayi is typing"><span /><span /><span /></div>}
+    </div>
+    <div className="chat-suggestions" aria-label="Suggested questions">
+      {['My wages are unpaid', 'Help with registration', 'Find a hospital'].map((suggestion) => <button type="button" key={suggestion} onClick={() => void sendMessage(suggestion)}>{suggestion}</button>)}
+    </div>
+    <form className="chat-input" onSubmit={submitChat}>
+      <input value={input} onChange={(event) => setInput(event.target.value)} placeholder="Type your question…" aria-label="Message Sahaayi" disabled={isSending} />
+      <button type="submit" disabled={!input.trim() || isSending} aria-label="Send message">↑</button>
+    </form>
+    <button type="button" className="chat-callback" onClick={onRequestCallback}>Prefer to speak? Request a call <span>→</span></button>
+  </aside>
 }
 
 function CallbackSheet({ language, onClose, onSuccess }: { language: string; onClose: () => void; onSuccess: (message: string) => void }) {
