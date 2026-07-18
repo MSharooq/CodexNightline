@@ -6,7 +6,7 @@ It helps a worker explain a need in their own language, understand the right nex
 
 ## What is working now
 
-- Mobile-first worker experience with Bengali, Hindi, Malayalam, and English language selection
+- Mobile-first worker experience with Bengali, Hindi, Malayalam, Tamil, Odia, Assamese, Kannada, Telugu, Marathi, and English language selection
 - Broad worker-helper journeys: benefits, wage support, injury/health help, registration, documents, and hospital navigation
 - Guided support escalation with a worker review step
 - A callback-request entry point that lets the Bolna voice agent call the worker, with safe demo fallbacks until it is configured

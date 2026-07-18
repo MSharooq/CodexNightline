@@ -34,6 +34,12 @@ const languages = [
   { label: 'বাংলা', name: 'Bengali' },
   { label: 'हिन्दी', name: 'Hindi' },
   { label: 'മലയാളം', name: 'Malayalam' },
+  { label: 'தமிழ்', name: 'Tamil' },
+  { label: 'ଓଡ଼ିଆ', name: 'Odia' },
+  { label: 'অসমীয়া', name: 'Assamese' },
+  { label: 'ಕನ್ನಡ', name: 'Kannada' },
+  { label: 'తెలుగు', name: 'Telugu' },
+  { label: 'मराठी', name: 'Marathi' },
   { label: 'English', name: 'English' },
 ]
 
@@ -433,6 +439,7 @@ function Chatbot({ language, onClose, onRequestCallback }: { language: string; o
 function CallbackSheet({ language, onClose, onSuccess }: { language: string; onClose: () => void; onSuccess: (message: string) => void }) {
   const [phoneNumber, setPhoneNumber] = useState('')
   const [name, setName] = useState('')
+  const [callbackLanguage, setCallbackLanguage] = useState(language)
   const [consent, setConsent] = useState(false)
   const [isSubmitting, setSubmitting] = useState(false)
   const [error, setError] = useState('')
@@ -449,7 +456,7 @@ function CallbackSheet({ language, onClose, onSuccess }: { language: string; onC
       const response = await fetch('/api/callback', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ phoneNumber, name, language }),
+        body: JSON.stringify({ phoneNumber, name, language: callbackLanguage }),
       })
       const data = await response.json() as { error?: string; message?: string }
       if (!response.ok) throw new Error(data.error ?? 'We could not request a callback right now.')
@@ -468,8 +475,12 @@ function CallbackSheet({ language, onClose, onSuccess }: { language: string; onC
       <div className="callback-icon">☎</div>
       <p className="eyebrow">Sahaayi can call you</p>
       <h2 id="callback-title">Request a callback</h2>
-      <p className="result-summary">Enter a number you can answer. Sahaayi will speak in {language} and ask how it can help.</p>
+      <p className="result-summary">Choose a language and enter a number you can answer. Sahaayi will call and speak in your chosen language.</p>
       <form className="callback-form" onSubmit={requestCallback}>
+        <label htmlFor="callback-language">Preferred language</label>
+        <select id="callback-language" value={callbackLanguage} onChange={(event) => setCallbackLanguage(event.target.value)}>
+          {languages.map((item) => <option key={item.name} value={item.name}>{item.label} — {item.name}</option>)}
+        </select>
         <label htmlFor="callback-phone">Phone number</label>
         <input id="callback-phone" required inputMode="tel" autoComplete="tel" value={phoneNumber} onChange={(event) => setPhoneNumber(event.target.value)} placeholder="+91 98765 43210" />
         <label htmlFor="callback-name">Name <span>Optional</span></label>

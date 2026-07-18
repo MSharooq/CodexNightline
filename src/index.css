@@ -93,7 +93,7 @@ h2 { font-size: 21px; line-height: 1.12; letter-spacing: -.04em; }
 
 .callback-icon { width: 51px; height: 51px; background: #79ebc5; font-size: 25px; margin-bottom: 20px; }
 .callback-form { margin-top: 22px; display: grid; gap: 7px; }.callback-form label { color: #40403d; font-size: 12px; font-weight: 700; margin: 4px 0 0 2px; }.callback-form label span { color: #898985; font-weight: 500; }
-.callback-form > input { width: 100%; min-height: 48px; border: 1px solid #deded8; border-radius: 14px; padding: 0 13px; outline: 0; color: #242424; background: #fff; font-size: 14px; }.callback-form > input:focus { border-color: #8b78c0; box-shadow: 0 0 0 3px rgba(201,181,247,.35); }.callback-form > input::placeholder { color: #a0a09d; }
+.callback-form > input, .callback-form > select { width: 100%; min-height: 48px; border: 1px solid #deded8; border-radius: 14px; padding: 0 13px; outline: 0; color: #242424; background: #fff; font-size: 14px; }.callback-form > input:focus, .callback-form > select:focus { border-color: #8b78c0; box-shadow: 0 0 0 3px rgba(201,181,247,.35); }.callback-form > input::placeholder { color: #a0a09d; }
 .consent-row { display: flex; gap: 9px; align-items: flex-start; color: #63635f !important; font-size: 11px !important; line-height: 1.4; font-weight: 500 !important; margin: 10px 0 8px !important; }.consent-row input { margin: 2px 0 0; accent-color: #1b1b1b; }
 .form-error { margin: 0 0 5px; padding: 9px 10px; border-radius: 11px; color: #9d3029; background: #fff1ef; font-size: 11px; line-height: 1.35; }.callback-form .primary-button:disabled, .help-input button:disabled { background: #747470; cursor: wait; }
 
