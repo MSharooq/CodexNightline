@@ -225,6 +225,7 @@ function App() {
   const [caseDraft, setCaseDraft] = useState<HelpResult | null>(null)
   const [isCallbackOpen, setCallbackOpen] = useState(false)
   const [isChatOpen, setChatOpen] = useState(false)
+  const [isQuickHelpOpen, setQuickHelpOpen] = useState(false)
   const [cases, setCases] = useState(initialCases)
   const [documents, setDocuments] = useState(initialDocuments)
   const [selectedCase, setSelectedCase] = useState<CaseItem | null>(null)
@@ -432,7 +433,9 @@ function App() {
       {showCaseSheet && <CaseSheet result={caseDraft} onClose={() => { setShowCaseSheet(false); setCaseDraft(null) }} onCreate={createCase} />}
       {isCallbackOpen && <CallbackSheet language={language.name} onClose={() => setCallbackOpen(false)} onSuccess={(message) => { setCallbackOpen(false); notify(message) }} />}
       {page !== 'dashboard' && <button type="button" className="chat-launcher" onClick={() => setChatOpen(true)} aria-label="Open Sahaayi chat"><span>✦</span><strong>Chat with Sahaayi</strong></button>}
+      {page !== 'dashboard' && <button type="button" className="quick-help-launcher" onClick={() => setQuickHelpOpen(true)} aria-label="Open Kerala quick help"><span>☎</span><strong>Quick Help</strong></button>}
       {isChatOpen && <Chatbot language={language.name} onClose={() => setChatOpen(false)} onRequestCallback={() => { setChatOpen(false); setCallbackOpen(true) }} />}
+      {isQuickHelpOpen && <QuickHelpSheet onClose={() => setQuickHelpOpen(false)} />}
       {toast && <div className="toast" role="status">✓ {toast}</div>}
       <div id="sahaayi-google-translate" className="browser-translate-root" aria-hidden="true" />
     </div>
@@ -580,6 +583,20 @@ function KeralaSupportShortcuts({ shortcuts, compact = false }: { shortcuts: Sup
     <p className="shortcut-heading"><span>☎</span> Kerala support shortcuts</p>
     <div className="shortcut-list">{shortcuts.map((shortcut) => <a key={`${shortcut.name}-${shortcut.number}`} className={`shortcut-card ${shortcut.tone}`} href={`tel:${shortcut.number.replaceAll(' ', '')}`}><span className="shortcut-number">{shortcut.number}</span><span className="shortcut-copy"><strong>{shortcut.name}</strong><small>{shortcut.detail}</small></span><span className="shortcut-call">Call <b>→</b></span></a>)}</div>
   </section>
+}
+
+function QuickHelpSheet({ onClose }: { onClose: () => void }) {
+  return <div className="sheet-backdrop" role="presentation" onMouseDown={onClose}>
+    <section className="help-sheet quick-help-sheet" role="dialog" aria-modal="true" aria-labelledby="quick-help-title" onMouseDown={(event) => event.stopPropagation()}>
+      <div className="sheet-handle" />
+      <button className="close-button" type="button" onClick={onClose} aria-label="Close quick help">×</button>
+      <div className="callback-icon">☎</div>
+      <p className="eyebrow">Kerala direct support</p>
+      <h2 id="quick-help-title">Quick Help</h2>
+      <p className="result-summary">Choose the number that best matches what is happening. For immediate danger, call Emergency first.</p>
+      <KeralaSupportShortcuts shortcuts={Object.values(keralaShortcuts)} />
+    </section>
+  </div>
 }
 
 function CaseSheet({ result, onClose, onCreate }: { result: HelpResult | null; onClose: () => void; onCreate: () => void }) {
