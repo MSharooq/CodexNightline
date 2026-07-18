@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useState } from 'react'
-import type { FormEvent } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
+import type { ChangeEvent, FormEvent } from 'react'
 import { setBrowserPageLanguage } from './browserTranslation'
 
 type Page = 'home' | 'cases' | 'documents' | 'profile' | 'dashboard'
@@ -32,6 +32,15 @@ type ChatMessage = {
   content: string
 }
 
+type DocumentItem = {
+  id: string
+  title: string
+  detail: string
+  icon: string
+  status: string
+  fileName?: string
+}
+
 const languages = [
   { label: 'English', name: 'English' },
   { label: 'বাংলা', name: 'Bengali' },
@@ -54,20 +63,26 @@ function getInitialLanguage() {
 const initialCases: CaseItem[] = [
   {
     id: 'SHY-2408',
-    title: 'Wage payment support',
+    title: 'Wage payment support · ₹12,500 pending',
     issue: 'unpaid_wages',
-    createdAt: 'Today, 10:42 AM',
+    createdAt: 'Today, 10:42 AM · Bengali',
     status: 'Under review',
-    nextAction: 'A support worker is reviewing your payment details.',
+    nextAction: 'Anjali, a support worker, is reviewing 3 payment-message screenshots.',
   },
   {
     id: 'SHY-2371',
     title: 'ATHIDHI registration help',
     issue: 'registration',
-    createdAt: '18 July',
+    createdAt: '18 July · Hindi',
     status: 'Awaiting you',
-    nextAction: 'Upload a photo of your identity document.',
+    nextAction: 'Add an identity-document photo to complete your checklist.',
   },
+]
+
+const initialDocuments: DocumentItem[] = [
+  { id: 'identity', title: 'Identity document', detail: 'Aadhaar card · added 18 July', icon: '▤', status: 'Ready', fileName: 'aadhaar-front.jpg' },
+  { id: 'payments', title: 'Payment messages', detail: '3 WhatsApp screenshots for wage support', icon: '◫', status: 'Attached', fileName: 'payment-messages.zip' },
+  { id: 'worksite', title: 'Worksite photos', detail: 'Optional evidence for a support request', icon: '◉', status: 'Add photo' },
 ]
 
 const quickActions: { title: string; detail: string; issue: Issue; icon: string; tone: string }[] = [
@@ -168,6 +183,8 @@ function App() {
   const [isCallbackOpen, setCallbackOpen] = useState(false)
   const [isChatOpen, setChatOpen] = useState(false)
   const [cases, setCases] = useState(initialCases)
+  const [documents, setDocuments] = useState(initialDocuments)
+  const [selectedCase, setSelectedCase] = useState<CaseItem | null>(null)
   const [toast, setToast] = useState('')
 
   useEffect(() => {
@@ -196,6 +213,13 @@ function App() {
 
   const openQuickAction = (issue: Issue) => setResult(resultForIssue(issue))
 
+  const attachDocument = (id: string, fileName: string) => {
+    setDocuments((current) => current.map((item) => item.id === id
+      ? { ...item, status: 'Attached', detail: 'Added just now to this device', fileName }
+      : item))
+    notify(`${fileName} is attached to this demo request.`)
+  }
+
   const createCase = () => {
     const type = caseDraft?.issue ?? 'other'
     const newCase: CaseItem = {
@@ -216,16 +240,16 @@ function App() {
 
   const renderPage = () => {
     if (page === 'cases') {
-      return <CasesPage cases={cases} onBack={() => setPage('home')} onOpenHelp={() => setPage('home')} />
+      return <CasesPage cases={cases} onBack={() => setPage('home')} onOpenHelp={() => setPage('home')} onViewCase={setSelectedCase} />
     }
     if (page === 'documents') {
-      return <DocumentsPage onNotify={notify} />
+      return <DocumentsPage documents={documents} onAttach={attachDocument} />
     }
     if (page === 'profile') {
-      return <ProfilePage language={language.name} onOpenLanguage={() => setLanguageOpen(true)} />
+      return <ProfilePage language={language.name} onOpenLanguage={() => setLanguageOpen(true)} onNotify={notify} />
     }
     if (page === 'dashboard') {
-      return <Dashboard cases={cases} onExit={() => setPage('home')} />
+      return <Dashboard cases={cases} onExit={() => setPage('home')} onOpenCase={setSelectedCase} />
     }
 
     return (
@@ -327,6 +351,7 @@ function App() {
         }
         notify('Your next-step checklist is ready.')
       }} />}
+      {selectedCase && <CaseDetailSheet item={selectedCase} onClose={() => setSelectedCase(null)} onAskSahaayi={() => { setSelectedCase(null); setChatOpen(true) }} />}
       {showCaseSheet && <CaseSheet result={caseDraft} onClose={() => { setShowCaseSheet(false); setCaseDraft(null) }} onCreate={createCase} />}
       {isCallbackOpen && <CallbackSheet language={language.name} onClose={() => setCallbackOpen(false)} onSuccess={(message) => { setCallbackOpen(false); notify(message) }} />}
       {page !== 'dashboard' && <button type="button" className="chat-launcher" onClick={() => setChatOpen(true)} aria-label="Open Sahaayi chat"><span>✦</span><strong>Chat with Sahaayi</strong></button>}
@@ -486,7 +511,26 @@ function CaseSheet({ result, onClose, onCreate }: { result: HelpResult | null; o
   </div>
 }
 
-function CasesPage({ cases, onBack, onOpenHelp }: { cases: CaseItem[]; onBack: () => void; onOpenHelp: () => void }) {
+function CaseDetailSheet({ item, onClose, onAskSahaayi }: { item: CaseItem; onClose: () => void; onAskSahaayi: () => void }) {
+  const updates = item.status === 'Under review'
+    ? ['Request received', 'Evidence summary prepared', 'Support worker review in progress']
+    : ['Request received', 'Checklist prepared', 'Waiting for your identity document']
+
+  return <div className="sheet-backdrop" role="presentation" onMouseDown={onClose}>
+    <section className="help-sheet case-detail-sheet" role="dialog" aria-modal="true" aria-labelledby="case-detail-title" onMouseDown={(event) => event.stopPropagation()}>
+      <div className="sheet-handle" />
+      <button className="close-button" type="button" onClick={onClose} aria-label="Close case">×</button>
+      <div className={`result-icon ${item.issue}`}>{issueIcon(item.issue)}</div>
+      <p className="eyebrow">{item.id} · {item.status}</p>
+      <h2 id="case-detail-title">{item.title}</h2>
+      <p className="result-summary">{item.nextAction}</p>
+      <div className="case-timeline">{updates.map((update, index) => <div key={update}><span>{index === updates.length - 1 ? '●' : '✓'}</span><p>{update}</p></div>)}</div>
+      <button type="button" className="primary-button" onClick={onAskSahaayi}>Ask Sahaayi about this case <span>→</span></button>
+    </section>
+  </div>
+}
+
+function CasesPage({ cases, onBack, onOpenHelp, onViewCase }: { cases: CaseItem[]; onBack: () => void; onOpenHelp: () => void; onViewCase: (item: CaseItem) => void }) {
   return <main className="inner-page">
     <button type="button" className="back-link" onClick={onBack}>← Home</button>
     <div className="page-heading"><div><p className="eyebrow">Your support</p><h1>My cases</h1><p className="subtle">You can always see what is happening next.</p></div><div className="case-count-large">{cases.length}<span>cases</span></div></div>
@@ -494,43 +538,61 @@ function CasesPage({ cases, onBack, onOpenHelp }: { cases: CaseItem[]; onBack: (
       {cases.map((item) => <article className="case-card" key={item.id}>
         <div className={`issue-symbol ${item.issue}`}>{issueIcon(item.issue)}</div>
         <div className="case-main"><div className="case-title-row"><h2>{item.title}</h2>{item.urgency && <span className="urgent-pill">{item.urgency}</span>}</div><p className="case-meta">{item.id} · {item.createdAt}</p><p className="case-next"><strong>Next:</strong> {item.nextAction}</p></div>
-        <div className="case-side"><span className={`status-pill ${item.status.toLowerCase().replaceAll(' ', '-')}`}>{item.status}</span><button type="button">View <span>→</span></button></div>
+        <div className="case-side"><span className={`status-pill ${item.status.toLowerCase().replaceAll(' ', '-')}`}>{item.status}</span><button type="button" onClick={() => onViewCase(item)}>View <span>→</span></button></div>
       </article>)}
     </div>
     <section className="need-more-card"><div><span className="help-dot">?</span><h2>Need help with something else?</h2><p>Tell Sahaayi in your own words. You do not need to choose the right department first.</p></div><button type="button" className="primary-button" onClick={onOpenHelp}>Ask Sahaayi <span>→</span></button></section>
   </main>
 }
 
-function DocumentsPage({ onNotify }: { onNotify: (message: string) => void }) {
-  const documents = [
-    { title: 'Identity document', detail: 'Not uploaded yet', icon: '▤', status: 'Add safely' },
-    { title: 'Payment messages', detail: 'Can help with wage support', icon: '◫', status: 'Upload proof' },
-    { title: 'Worksite photos', detail: 'Optional evidence for a support request', icon: '◉', status: 'Add photo' },
-  ]
+function DocumentsPage({ documents, onAttach }: { documents: DocumentItem[]; onAttach: (id: string, fileName: string) => void }) {
+  const fileInput = useRef<HTMLInputElement>(null)
+  const [documentToAttach, setDocumentToAttach] = useState<DocumentItem | null>(null)
+
+  const selectDocument = (document: DocumentItem) => {
+    setDocumentToAttach(document)
+    fileInput.current?.click()
+  }
+
+  const attachSelectedFile = (event: ChangeEvent<HTMLInputElement>) => {
+    const selectedFile = event.target.files?.[0]
+    if (selectedFile && documentToAttach) onAttach(documentToAttach.id, selectedFile.name)
+    event.target.value = ''
+  }
+
   return <main className="inner-page">
     <div className="page-heading"><div><p className="eyebrow">Keep things together</p><h1>My documents</h1><p className="subtle">Only share what is needed for your support request.</p></div></div>
     <div className="document-tip"><span>⌁</span><p><strong>Your documents stay yours.</strong> Sahaayi will always show you what you are sharing and why.</p></div>
-    <div className="document-list">{documents.map((document) => <article key={document.title} className="document-card"><span className="document-icon">{document.icon}</span><div><h2>{document.title}</h2><p>{document.detail}</p></div><button type="button" onClick={() => onNotify('Document upload will be connected to secure storage once Supabase is configured.')}>{document.status} <span>→</span></button></article>)}</div>
+    <input ref={fileInput} className="visually-hidden" type="file" accept="image/*,.pdf" onChange={attachSelectedFile} />
+    <div className="document-list">{documents.map((document) => <article key={document.id} className="document-card"><span className="document-icon">{document.icon}</span><div><h2>{document.title}</h2><p>{document.detail}</p>{document.fileName && <small>{document.fileName}</small>}</div><button type="button" onClick={() => selectDocument(document)}>{document.status === 'Attached' || document.status === 'Ready' ? 'Replace' : document.status} <span>→</span></button></article>)}</div>
   </main>
 }
 
-function ProfilePage({ language, onOpenLanguage }: { language: string; onOpenLanguage: () => void }) {
+function ProfilePage({ language, onOpenLanguage, onNotify }: { language: string; onOpenLanguage: () => void; onNotify: (message: string) => void }) {
   return <main className="inner-page profile-page">
     <div className="profile-hero"><div className="profile-avatar">☺</div><div><p className="eyebrow">Your space</p><h1>Welcome to Sahaayi</h1><p>Choose how you want Sahaayi to speak with you.</p></div></div>
-    <div className="profile-settings"><button type="button" onClick={onOpenLanguage}><span><strong>Language</strong><small>Currently speaking in {language}</small></span><span>›</span></button><button type="button"><span><strong>Privacy and sharing</strong><small>Control what support workers can see</small></span><span>›</span></button><button type="button"><span><strong>About Sahaayi</strong><small>How this helper connects you to support</small></span><span>›</span></button></div>
+    <div className="profile-settings"><button type="button" onClick={onOpenLanguage}><span><strong>Language</strong><small>Currently speaking in {language}</small></span><span>›</span></button><button type="button" onClick={() => onNotify('Privacy setting: support workers only see information you send for a request.')}><span><strong>Privacy and sharing</strong><small>Share only when you approve</small></span><span>›</span></button><button type="button" onClick={() => onNotify('Sahaayi guides you to official services, NGOs and support workers.')}><span><strong>About Sahaayi</strong><small>How this helper connects you to support</small></span><span>›</span></button></div>
     <p className="profile-footer">Sahaayi is a support navigator. Always seek urgent medical or emergency help when you are in immediate danger.</p>
   </main>
 }
 
-function Dashboard({ cases, onExit }: { cases: CaseItem[]; onExit: () => void }) {
-  const urgent = cases.filter((item) => item.urgency).length + 1
+function Dashboard({ cases, onExit, onOpenCase }: { cases: CaseItem[]; onExit: () => void; onOpenCase: (item: CaseItem) => void }) {
+  const [filter, setFilter] = useState<'all' | 'urgent' | 'unassigned'>('all')
+  const queue: CaseItem[] = [
+    ...cases,
+    { id: 'SHY-2419', title: 'Workplace injury support · cut at worksite', issue: 'injury', createdAt: '9 min ago · Hindi', status: 'Under review', nextAction: 'Route to public hospital and safety support', urgency: 'Urgent' },
+    { id: 'SHY-2414', title: 'Hospital navigation · Kochi', issue: 'hospital', createdAt: '22 min ago · Bengali', status: 'Awaiting you', nextAction: 'Confirm nearest verified centre' },
+    { id: 'SHY-2405', title: 'Missing passport support', issue: 'documents', createdAt: '48 min ago · Odia', status: 'Under review', nextAction: 'Document safety review' },
+  ]
+  const visibleQueue = queue.filter((item) => filter === 'all' || (filter === 'urgent' ? Boolean(item.urgency) : item.status === 'Awaiting you'))
+  const urgent = queue.filter((item) => item.urgency).length
   return <main className="dashboard-page">
-    <aside className="dashboard-nav"><button type="button" className="brand"><span className="brand-mark">s</span><span>Sahaayi</span></button><p className="dashboard-role">Support workspace</p><button className="dashboard-nav-item selected" type="button">◫ Case inbox <span>{cases.length + 7}</span></button><button className="dashboard-nav-item" type="button">✦ My assignments</button><button className="dashboard-nav-item" type="button">⌁ Service directory</button><button className="dashboard-nav-item" type="button">▥ Insights</button><button className="exit-dashboard" type="button" onClick={onExit}>← Worker app</button></aside>
+    <aside className="dashboard-nav"><button type="button" className="brand"><span className="brand-mark">s</span><span>Sahaayi</span></button><p className="dashboard-role">Support workspace</p><button className="dashboard-nav-item selected" type="button">◫ Case inbox <span>{queue.length}</span></button><button className="dashboard-nav-item" type="button">✦ My assignments</button><button className="dashboard-nav-item" type="button">⌁ Service directory</button><button className="dashboard-nav-item" type="button">▥ Insights</button><button className="exit-dashboard" type="button" onClick={onExit}>← Worker app</button></aside>
     <section className="dashboard-main"><header className="dashboard-header"><div><p className="eyebrow">Caseworker dashboard</p><h1>Good morning, Anjali.</h1></div><div className="dashboard-header-actions"><button type="button">⌕ Search</button><span className="agent-avatar">A</span></div></header>
-      <section className="metrics"><article><span className="metric-icon blue">◫</span><div><strong>{cases.length + 7}</strong><p>New cases</p></div><span className="metric-change">+3 today</span></article><article><span className="metric-icon danger">✚</span><div><strong>{urgent}</strong><p>Urgent review</p></div><span className="metric-change danger-text">Needs attention</span></article><article><span className="metric-icon mint">✓</span><div><strong>18</strong><p>Resolved this week</p></div><span className="metric-change">+24%</span></article></section>
-      <section className="inbox-heading"><div><h2>Incoming cases</h2><p>AI-generated summaries must be reviewed before action.</p></div><div className="filters"><button type="button" className="filter-active">All cases</button><button type="button">Urgent</button><button type="button">Unassigned</button></div></section>
+      <section className="metrics"><article><span className="metric-icon blue">◫</span><div><strong>{queue.length}</strong><p>New cases</p></div><span className="metric-change">+3 today</span></article><article><span className="metric-icon danger">✚</span><div><strong>{urgent}</strong><p>Urgent review</p></div><span className="metric-change danger-text">Needs attention</span></article><article><span className="metric-icon mint">✓</span><div><strong>18</strong><p>Resolved this week</p></div><span className="metric-change">+24%</span></article></section>
+      <section className="inbox-heading"><div><h2>Incoming cases</h2><p>AI-generated summaries must be reviewed before action.</p></div><div className="filters"><button type="button" className={filter === 'all' ? 'filter-active' : ''} onClick={() => setFilter('all')}>All cases</button><button type="button" className={filter === 'urgent' ? 'filter-active' : ''} onClick={() => setFilter('urgent')}>Urgent</button><button type="button" className={filter === 'unassigned' ? 'filter-active' : ''} onClick={() => setFilter('unassigned')}>Needs worker reply</button></div></section>
       <section className="case-table"><div className="table-head"><span>Worker request</span><span>Language</span><span>Urgency</span><span>Recommended path</span><span /></div>
-        {[...cases, { id: 'SHY-2419', title: 'Workplace injury support', issue: 'injury' as Issue, createdAt: '9 min ago', status: 'Under review' as const, nextAction: 'Health support', urgency: 'Urgent' as const }, { id: 'SHY-2414', title: 'Hospital navigation', issue: 'hospital' as Issue, createdAt: '22 min ago', status: 'Awaiting you' as const, nextAction: 'Nearest verified centre' }].map((item, index) => <article className="table-row" key={`${item.id}-${index}`}><div className="table-request"><span className={`issue-symbol small ${item.issue}`}>{issueIcon(item.issue)}</span><div><strong>{item.title}</strong><small>{item.id} · {item.createdAt}</small></div></div><span>{index % 2 ? 'Hindi' : 'Bengali'}</span><span>{item.urgency ? <span className="urgent-pill">Urgent</span> : <span className="review-pill">Review</span>}</span><span className="path-text">{item.nextAction}</span><button type="button" className="open-case">Open <span>→</span></button></article>)}
+        {visibleQueue.map((item, index) => <article className="table-row" key={`${item.id}-${index}`}><div className="table-request"><span className={`issue-symbol small ${item.issue}`}>{issueIcon(item.issue)}</span><div><strong>{item.title}</strong><small>{item.id} · {item.createdAt}</small></div></div><span>{item.createdAt.includes('Hindi') ? 'Hindi' : item.createdAt.includes('Odia') ? 'Odia' : 'Bengali'}</span><span>{item.urgency ? <span className="urgent-pill">Urgent</span> : <span className="review-pill">Review</span>}</span><span className="path-text">{item.nextAction}</span><button type="button" className="open-case" onClick={() => onOpenCase(item)}>Open <span>→</span></button></article>)}
       </section>
     </section>
   </main>
