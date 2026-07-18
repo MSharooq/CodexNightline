@@ -326,6 +326,12 @@ function App() {
           </div>
         </section>
 
+        <section className="trust-card" aria-labelledby="trust-card-title">
+          <div className="trust-card-heading"><p className="eyebrow">Know what to expect</p><h2 id="trust-card-title">What Sahaayi can and cannot do</h2><p>Sahaayi makes existing support easier to understand and use. You stay in control of every next step.</p></div>
+          <div className="trust-columns"><article><span className="trust-icon can">✓</span><div><h3>Sahaayi can help you</h3><ul><li>Understand a support path</li><li>Prepare a simple checklist</li><li>Connect with a relevant service or support worker</li></ul></div></article><article><span className="trust-icon cannot">!</span><div><h3>Sahaayi cannot</h3><ul><li>Decide benefit eligibility</li><li>Replace a doctor, lawyer or emergency service</li><li>Promise a government outcome</li></ul></div></article></div>
+          <button type="button" className="trust-urgent-link" onClick={() => setResult(resultForIssue('injury'))}>Need urgent help now? <span>→</span></button>
+        </section>
+
         <section className="two-up">
           <article className="support-card">
             <div className="support-card-icon">⌂</div>
@@ -361,6 +367,10 @@ function App() {
       </header>
 
       <div className="content-wrap">{renderPage()}</div>
+
+      <footer className="site-footer">
+        <div className="site-footer-inner"><div className="footer-brand"><span className="brand-mark">s</span><div><strong>Sahaayi</strong><small>A multilingual helper for workers in Kerala</small></div></div><div className="footer-note"><strong>Privacy</strong><p>How Sahaayi uses your number: only to request the callback you approve. Please do not share bank or identity numbers in chat.</p></div><div className="footer-note emergency"><strong>Not an emergency service</strong><p>For immediate danger or a serious medical emergency, seek urgent local help first.</p></div></div>
+      </footer>
 
       {page !== 'dashboard' && <nav className="bottom-nav" aria-label="Main navigation">
         {navItems.map((item) => <button className={page === item.id ? 'selected' : ''} key={item.id} type="button" onClick={() => setPage(item.id)}><span>{item.icon}</span>{item.label}</button>)}
