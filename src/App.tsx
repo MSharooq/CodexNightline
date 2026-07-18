@@ -355,7 +355,7 @@ function App() {
         </section>
 
         <section className="chat-spotlight" aria-label="Chat with Sahaayi AI">
-          <div className="chat-spotlight-icon">✦</div>
+          <div className="chat-spotlight-icon"><img className="sahaayi-logo" src="/icons/sahaayi-icon.svg" alt="" /></div>
           <div className="chat-spotlight-copy"><span className="chat-kicker">Sahaayi chatbot</span><h2>Prefer typing? Use the chatbot.</h2><p>Ask a question, get a simple answer, then take your next step.</p></div>
           <button type="button" onClick={() => setChatOpen(true)}>Open chatbot <span>→</span></button>
         </section>
@@ -422,7 +422,7 @@ function App() {
   return (
     <div className="app-shell">
       <header className="topbar">
-        <button type="button" className="brand" onClick={() => setPage('home')} aria-label="Sahaayi home"><span className="brand-mark">s</span><span>Sahaayi</span></button>
+        <button type="button" className="brand" onClick={() => setPage('home')} aria-label="Sahaayi home"><img className="brand-logo" src="/icons/sahaayi-icon.svg" alt="" /><span>Sahaayi</span></button>
         <div className="top-actions">
           <div className="language-menu notranslate" translate="no">
             <button className="language-switch" type="button" onClick={() => setLanguageOpen((open) => !open)}><span className="language-icon">◎</span><span className="language-copy"><small>Language</small><strong>{language.label}<span className="hide-on-small"> · {language.name}</span></strong></span><span>⌄</span></button>
@@ -435,7 +435,7 @@ function App() {
       <div className="content-wrap">{renderPage()}</div>
 
       <footer className="site-footer">
-        <div className="site-footer-inner"><div className="footer-brand"><span className="brand-mark">s</span><div><strong>Sahaayi</strong><small>A multilingual helper for workers in Kerala</small></div></div><div className="footer-note"><strong>Privacy</strong><p>How Sahaayi uses your number: only to request the callback you approve. Please do not share bank or identity numbers in chat.</p></div><div className="footer-note emergency"><strong>Not an emergency service</strong><p>For immediate danger or a serious medical emergency, seek urgent local help first.</p></div></div>
+        <div className="site-footer-inner"><div className="footer-brand"><img className="brand-logo" src="/icons/sahaayi-icon.svg" alt="" /><div><strong>Sahaayi</strong><small>A multilingual helper for workers in Kerala</small></div></div><div className="footer-note"><strong>Privacy</strong><p>How Sahaayi uses your number: only to request the callback you approve. Please do not share bank or identity numbers in chat.</p></div><div className="footer-note emergency"><strong>Not an emergency service</strong><p>For immediate danger or a serious medical emergency, seek urgent local help first.</p></div></div>
       </footer>
 
       {page !== 'dashboard' && <nav className="bottom-nav" aria-label="Main navigation">
@@ -455,7 +455,7 @@ function App() {
       {showCaseSheet && <CaseSheet result={caseDraft} onClose={() => { setShowCaseSheet(false); setCaseDraft(null) }} onCreate={createCase} />}
       {isCallbackOpen && <CallbackSheet language={language.name} onClose={() => setCallbackOpen(false)} onSuccess={(message) => { setCallbackOpen(false); notify(message) }} />}
       {page !== 'dashboard' && <button type="button" className="call-launcher" onClick={() => { setChatOpen(false); setCallbackOpen(true) }} aria-label="Request a call from Sahaayi"><span>☎</span><strong>Call Sahaayi</strong></button>}
-      {page !== 'dashboard' && <button type="button" className="chat-launcher" onClick={() => setChatOpen(true)} aria-label="Open Sahaayi chat"><span>✦</span><strong>Chat with Sahaayi</strong></button>}
+      {page !== 'dashboard' && <button type="button" className="chat-launcher" onClick={() => setChatOpen(true)} aria-label="Open Sahaayi chat"><span><img className="sahaayi-logo" src="/icons/sahaayi-icon.svg" alt="" /></span><strong>Chat with Sahaayi</strong></button>}
       {page !== 'dashboard' && <button type="button" className="quick-help-launcher" onClick={() => setQuickHelpOpen(true)} aria-label="Open Kerala quick help"><span>☎</span><strong>Quick Help</strong></button>}
       {isChatOpen && <Chatbot language={language.name} onClose={() => setChatOpen(false)} onRequestCallback={() => { setChatOpen(false); setCallbackOpen(true) }} />}
       {isQuickHelpOpen && <QuickHelpSheet onClose={() => setQuickHelpOpen(false)} />}
@@ -506,7 +506,7 @@ function Chatbot({ language, onClose, onRequestCallback }: { language: string; o
   }
 
   return <aside className="chat-panel" role="dialog" aria-modal="false" aria-label="Chat with Sahaayi">
-    <header className="chat-header"><div><span className="chat-avatar">✦</span><div><strong>Sahaayi</strong><small>Here to help in {language}</small></div></div><button type="button" onClick={onClose} aria-label="Close chat">×</button></header>
+    <header className="chat-header"><div><span className="chat-avatar"><img className="sahaayi-logo" src="/icons/sahaayi-icon.svg" alt="" /></span><div><strong>Sahaayi</strong><small>Here to help in {language}</small></div></div><button type="button" onClick={onClose} aria-label="Close chat">×</button></header>
     <div className="chat-messages" aria-live="polite">
       {messages.map((message) => <div className={`chat-message ${message.role}`} key={message.id}>{message.content}</div>)}
       {isSending && <div className="chat-message assistant typing" aria-label="Sahaayi is typing"><span /><span /><span /></div>}
@@ -729,7 +729,7 @@ function Dashboard({ cases, onExit, onOpenCase }: { cases: CaseItem[]; onExit: (
   const visibleQueue = queue.filter((item) => filter === 'all' || (filter === 'urgent' ? Boolean(item.urgency) : item.status === 'Awaiting you'))
   const urgent = queue.filter((item) => item.urgency).length
   return <main className="dashboard-page">
-    <aside className="dashboard-nav"><button type="button" className="brand"><span className="brand-mark">s</span><span>Sahaayi</span></button><p className="dashboard-role">Support workspace</p><button className="dashboard-nav-item selected" type="button">◫ Case inbox <span>{queue.length}</span></button><button className="dashboard-nav-item" type="button">✦ My assignments</button><button className="dashboard-nav-item" type="button">⌁ Service directory</button><button className="dashboard-nav-item" type="button">▥ Insights</button><button className="exit-dashboard" type="button" onClick={onExit}>← Worker app</button></aside>
+    <aside className="dashboard-nav"><button type="button" className="brand"><img className="brand-logo" src="/icons/sahaayi-icon.svg" alt="" /><span>Sahaayi</span></button><p className="dashboard-role">Support workspace</p><button className="dashboard-nav-item selected" type="button">◫ Case inbox <span>{queue.length}</span></button><button className="dashboard-nav-item" type="button">✦ My assignments</button><button className="dashboard-nav-item" type="button">⌁ Service directory</button><button className="dashboard-nav-item" type="button">▥ Insights</button><button className="exit-dashboard" type="button" onClick={onExit}>← Worker app</button></aside>
     <section className="dashboard-main"><header className="dashboard-header"><div><p className="eyebrow">Caseworker dashboard</p><h1>Good morning, Anjali.</h1></div><div className="dashboard-header-actions"><button type="button">⌕ Search</button><span className="agent-avatar">A</span></div></header>
       <section className="metrics"><article><span className="metric-icon blue">◫</span><div><strong>{queue.length}</strong><p>New cases</p></div><span className="metric-change">+3 today</span></article><article><span className="metric-icon danger">✚</span><div><strong>{urgent}</strong><p>Urgent review</p></div><span className="metric-change danger-text">Needs attention</span></article><article><span className="metric-icon mint">✓</span><div><strong>18</strong><p>Resolved this week</p></div><span className="metric-change">+24%</span></article></section>
       <section className="inbox-heading"><div><h2>Incoming cases</h2><p>AI-generated summaries must be reviewed before action.</p></div><div className="filters"><button type="button" className={filter === 'all' ? 'filter-active' : ''} onClick={() => setFilter('all')}>All cases</button><button type="button" className={filter === 'urgent' ? 'filter-active' : ''} onClick={() => setFilter('urgent')}>Urgent</button><button type="button" className={filter === 'unassigned' ? 'filter-active' : ''} onClick={() => setFilter('unassigned')}>Needs worker reply</button></div></section>
