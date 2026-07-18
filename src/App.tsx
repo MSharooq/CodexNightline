@@ -68,6 +68,21 @@ const languages = [
   { label: 'मराठी', name: 'Marathi' },
 ]
 
+const heroSlides = [
+  {
+    main: '/images/worker-hero.jpg',
+    mainAlt: 'Construction workers at a job site in India',
+    detail: '/images/worker-sunset.jpg',
+    detailAlt: 'Construction workers at sunset',
+  },
+  {
+    main: '/images/worker-sunset.jpg',
+    mainAlt: 'Construction workers at sunset',
+    detail: '/images/worker-hero.jpg',
+    detailAlt: 'Construction workers at a job site in India',
+  },
+]
+
 function getInitialLanguage() {
   if (typeof window === 'undefined') return languages[0]
   const savedLanguage = window.localStorage.getItem('sahaayi-preferred-language')
@@ -252,6 +267,7 @@ function App() {
   const [documents, setDocuments] = useState(initialDocuments)
   const [selectedCase, setSelectedCase] = useState<CaseItem | null>(null)
   const [toast, setToast] = useState('')
+  const [heroSlideIndex, setHeroSlideIndex] = useState(0)
 
   useEffect(() => {
     if (language.name === 'English') return
@@ -259,6 +275,12 @@ function App() {
       setToast('Website translation could not load. Sahaayi will still reply in your selected language.')
     })
   }, [language.name])
+
+  useEffect(() => {
+    if (page !== 'home' || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
+    const carouselTimer = window.setInterval(() => setHeroSlideIndex((current) => (current + 1) % heroSlides.length), 6000)
+    return () => window.clearInterval(carouselTimer)
+  }, [page])
 
   const caseCount = useMemo(() => cases.filter((item) => item.status !== 'Resolved').length, [cases])
 
@@ -332,10 +354,11 @@ function App() {
             </div>
             <ul className="intro-proof" aria-label="Ways Sahaayi can help"><li><span>✓</span> Wages &amp; workplace safety</li><li><span>✓</span> Documents &amp; registration</li><li><span>✓</span> Benefits &amp; nearby services</li></ul>
           </div>
-          <div className="intro-images" aria-label="Construction workers at work">
-            <img className="intro-main-photo" src="/images/worker-hero.jpg" alt="Construction workers at a job site in India" />
-            <img className="intro-small-photo" src="/images/worker-sunset.jpg" alt="Construction workers at sunset" loading="lazy" />
+          <div className="intro-images" role="region" aria-roledescription="carousel" aria-label="Workers in Kerala">
+            <img key={`main-${heroSlideIndex}`} className="intro-main-photo" src={heroSlides[heroSlideIndex].main} alt={heroSlides[heroSlideIndex].mainAlt} />
+            <img key={`detail-${heroSlideIndex}`} className="intro-small-photo" src={heroSlides[heroSlideIndex].detail} alt={heroSlides[heroSlideIndex].detailAlt} loading="lazy" />
             <div className="intro-language-card"><span>◎</span><div><small>Speak naturally in</small><strong>{language.label} · {language.name}</strong></div></div>
+            <div className="hero-carousel-controls" aria-label="Choose hero image">{heroSlides.map((_, index) => <button key={index} type="button" className={heroSlideIndex === index ? 'active' : ''} onClick={() => setHeroSlideIndex(index)} aria-label={`Show image ${index + 1}`} aria-current={heroSlideIndex === index} />)}</div>
             <p className="photo-credit">Photos: Pexels</p>
           </div>
         </section>
