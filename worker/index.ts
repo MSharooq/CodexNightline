@@ -103,6 +103,29 @@ function formatHistory(history: ChatHistoryItem[]) {
     .join('\n')
 }
 
+function extractOpenAIText(data: unknown) {
+  if (!data || typeof data !== 'object') return ''
+
+  const response = data as {
+    output_text?: unknown
+    output?: Array<{ content?: Array<{ type?: unknown; text?: unknown }> }>
+  }
+
+  if (typeof response.output_text === 'string' && response.output_text.trim()) {
+    return response.output_text.trim()
+  }
+
+  const parts: string[] = []
+  for (const item of response.output ?? []) {
+    for (const content of item.content ?? []) {
+      if (content.type === 'output_text' && typeof content.text === 'string' && content.text.trim()) {
+        parts.push(content.text.trim())
+      }
+    }
+  }
+  return parts.join('\n')
+}
+
 async function getOpenAIHelp(message: string, language: string, env: SahaayiEnv, history: ChatHistoryItem[] = []) {
   const issueType = detectIssue(message)
   if (!env.OPENAI_API_KEY) {
@@ -144,9 +167,10 @@ async function getOpenAIHelp(message: string, language: string, env: SahaayiEnv,
     }
   }
 
-  const data = await response.json() as { output_text?: unknown }
-  const answer = typeof data.output_text === 'string' && data.output_text.trim()
-    ? data.output_text.trim()
+  const data = await response.json()
+  const outputText = extractOpenAIText(data)
+  const answer = outputText
+    ? outputText
     : 'I can help you find the next right step. Please tell me a little more about what happened.'
 
   return { issueType, answer, mode: 'openai' }
