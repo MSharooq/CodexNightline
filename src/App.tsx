@@ -78,6 +78,24 @@ const heroSlides = [
   {
     main: '/images/worker-sunset.jpg',
     mainAlt: 'Construction workers at sunset',
+    detail: '/images/worker-building-site.jpg',
+    detailAlt: 'Construction team working on a building site in India',
+  },
+  {
+    main: '/images/worker-building-site.jpg',
+    mainAlt: 'Construction team working on a building site in India',
+    detail: '/images/worker-safety-site.jpg',
+    detailAlt: 'Construction workers wearing safety gear at an indoor site in India',
+  },
+  {
+    main: '/images/worker-safety-site.jpg',
+    mainAlt: 'Construction workers wearing safety gear at an indoor site in India',
+    detail: '/images/worker-woman-site.jpg',
+    detailAlt: 'Woman construction worker at a building site in India',
+  },
+  {
+    main: '/images/worker-woman-site.jpg',
+    mainAlt: 'Woman construction worker at a building site in India',
     detail: '/images/worker-hero.jpg',
     detailAlt: 'Construction workers at a job site in India',
   },
