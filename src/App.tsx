@@ -41,6 +41,13 @@ type DocumentItem = {
   fileName?: string
 }
 
+type SupportShortcut = {
+  name: string
+  number: string
+  detail: string
+  tone: 'emergency' | 'health' | 'support'
+}
+
 const languages = [
   { label: 'English', name: 'English' },
   { label: 'বাংলা', name: 'Bengali' },
@@ -100,6 +107,42 @@ const navItems: { id: Page; label: string; icon: string }[] = [
   { id: 'documents', label: 'Documents', icon: '▤' },
   { id: 'profile', label: 'Profile', icon: '☺' },
 ]
+
+const keralaShortcuts: Record<string, SupportShortcut> = {
+  emergency: { name: 'Emergency', number: '112', detail: 'For immediate danger or urgent police help', tone: 'emergency' },
+  ambulance: { name: 'Ambulance', number: '108', detail: 'Emergency medical transport in Kerala', tone: 'emergency' },
+  disha: { name: 'DISHA', number: '1056', detail: 'Kerala’s 24×7 health helpline', tone: 'health' },
+  labour: { name: 'Labour Call Centre', number: '1800 42555 214', detail: 'Wage, worksite and labour-support queries', tone: 'support' },
+  citizen: { name: 'Citizen Call Centre', number: '155300', detail: 'Kerala government service guidance', tone: 'support' },
+  child: { name: 'Child Helpline', number: '1098', detail: 'Support when a child may be at risk', tone: 'emergency' },
+  women: { name: 'Women Helpline', number: '181', detail: 'Support for women seeking help or safety guidance', tone: 'emergency' },
+}
+
+function shortcutsForIssue(issue: Issue): SupportShortcut[] {
+  const shortcutKeys: Partial<Record<Issue, Array<keyof typeof keralaShortcuts>>> = {
+    injury: ['emergency', 'ambulance', 'disha'],
+    hospital: ['ambulance', 'disha'],
+    unpaid_wages: ['labour'],
+    registration: ['citizen', 'labour'],
+    documents: ['labour', 'citizen'],
+    benefits: ['citizen', 'labour'],
+  }
+  return (shortcutKeys[issue] ?? []).map((key) => keralaShortcuts[key])
+}
+
+function shortcutsForMessage(message: string): SupportShortcut[] {
+  const text = message.toLowerCase()
+  const hasChildConcern = /\b(child|children|minor|kid|son|daughter|boy|girl)\b/.test(text)
+  const hasWomenConcern = /\b(woman|women|female|wife|sister|harass|abuse|domestic|violence)\b/.test(text)
+  const hasImmediateDanger = /\b(danger|urgent|attack|unsafe|hurt|bleed|emergency|violence)\b/.test(text)
+
+  if (hasChildConcern) return [keralaShortcuts.child, ...(hasImmediateDanger ? [keralaShortcuts.emergency] : [])]
+  if (hasWomenConcern) return [keralaShortcuts.women, ...(hasImmediateDanger ? [keralaShortcuts.emergency] : [])]
+  if (/(wage|salary|payment|contractor|employer|worksite)/.test(text)) return [keralaShortcuts.labour]
+  if (/(injur|hospital|ill|pain|accident|bleed)/.test(text)) return [keralaShortcuts.ambulance, keralaShortcuts.disha]
+  if (/(register|athidhi|benefit|welfare|scheme|government service)/.test(text)) return [keralaShortcuts.citizen]
+  return []
+}
 
 function resultForIssue(issue: Issue, statement = ''): HelpResult {
   const spoken = statement || 'your request'
@@ -402,10 +445,12 @@ function Chatbot({ language, onClose, onRequestCallback }: { language: string; o
   ])
   const [input, setInput] = useState('')
   const [isSending, setSending] = useState(false)
+  const [shortcuts, setShortcuts] = useState<SupportShortcut[]>([])
 
   const sendMessage = async (text: string) => {
     const message = text.trim()
     if (!message || isSending) return
+    setShortcuts(shortcutsForMessage(message))
     const userMessage: ChatMessage = { id: `user-${messages.length}`, role: 'user', content: message }
     const history = messages.slice(-6).map(({ role, content }) => ({ role, content }))
     setMessages((current) => [...current, userMessage])
@@ -440,6 +485,7 @@ function Chatbot({ language, onClose, onRequestCallback }: { language: string; o
       {messages.map((message) => <div className={`chat-message ${message.role}`} key={message.id}>{message.content}</div>)}
       {isSending && <div className="chat-message assistant typing" aria-label="Sahaayi is typing"><span /><span /><span /></div>}
     </div>
+    {shortcuts.length > 0 && <KeralaSupportShortcuts shortcuts={shortcuts} compact />}
     <div className="chat-suggestions" aria-label="Suggested questions">
       {['My wages are unpaid', 'Help with registration', 'Find a hospital'].map((suggestion) => <button type="button" key={suggestion} onClick={() => void sendMessage(suggestion)}>{suggestion}</button>)}
     </div>
@@ -520,10 +566,20 @@ function HelpSheet({ result, onClose, onContinue }: { result: HelpResult; onClos
       <h2 id="help-title">{result.title}</h2>
       <p className="result-summary">{result.summary}</p>
       <div className="next-step"><span>→</span><div><strong>Next step</strong><p>{result.nextStep}</p></div></div>
+      <KeralaSupportShortcuts shortcuts={shortcutsForIssue(result.issue)} />
       <button type="button" className="primary-button" onClick={onContinue}>{result.action} <span>→</span></button>
       <p className="data-note">Sahaayi gives guidance and connects you to support. It does not replace emergency, legal, or medical advice.</p>
     </section>
   </div>
+}
+
+function KeralaSupportShortcuts({ shortcuts, compact = false }: { shortcuts: SupportShortcut[]; compact?: boolean }) {
+  if (shortcuts.length === 0) return null
+
+  return <section className={`kerala-shortcuts ${compact ? 'compact' : ''}`} aria-label="Relevant Kerala support shortcuts">
+    <p className="shortcut-heading"><span>☎</span> Kerala support shortcuts</p>
+    <div className="shortcut-list">{shortcuts.map((shortcut) => <a key={`${shortcut.name}-${shortcut.number}`} className={`shortcut-card ${shortcut.tone}`} href={`tel:${shortcut.number.replaceAll(' ', '')}`}><span className="shortcut-number">{shortcut.number}</span><span className="shortcut-copy"><strong>{shortcut.name}</strong><small>{shortcut.detail}</small></span><span className="shortcut-call">Call <b>→</b></span></a>)}</div>
+  </section>
 }
 
 function CaseSheet({ result, onClose, onCreate }: { result: HelpResult | null; onClose: () => void; onCreate: () => void }) {
