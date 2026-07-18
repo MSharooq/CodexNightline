@@ -257,8 +257,9 @@ function App() {
         <section className="intro-hero" aria-labelledby="intro-title">
           <div className="intro-copy">
             <p className="eyebrow hero-eyebrow"><span /> A multilingual helper for migrant workers in Kerala</p>
-            <h1 id="intro-title">Get the help you need.<br /><em>Without knowing where to start.</em></h1>
-            <p className="intro-summary">Sahaayi is a voice and chat assistant that helps migrant workers understand benefits, solve workplace problems and reach the right support — in the language they speak.</p>
+            <h1 id="intro-title">Support for your work and life in Kerala.<br /><em>In your language.</em></h1>
+            <p className="intro-summary">Sahaayi is a voice and chat helper for migrant workers living and working in Kerala. Understand benefits, solve workplace problems and find the right official or community support.</p>
+            <label className="hero-language-select"><span>Start in your language</span><select value={language.name} onChange={(event) => { const selected = languages.find((item) => item.name === event.target.value); if (selected) changeLanguage(selected) }}>{languages.map((item) => <option key={item.name} value={item.name}>{item.label} · {item.name}</option>)}</select></label>
             <div className="intro-actions">
               <button type="button" className="intro-primary-action" onClick={() => setCallbackOpen(true)}>Request a voice callback <span>→</span></button>
               <button type="button" className="intro-secondary-action" onClick={() => setChatOpen(true)}>Chat with Sahaayi</button>
@@ -276,7 +277,7 @@ function App() {
         <section className="voice-card callback-hero" aria-label="Sahaayi voice agent callback">
           <div className="voice-copy">
             <span className="small-pill"><span className="pulse-dot" />Voice agent callback · {language.name}</span>
-            <h2>Let Sahaayi call you.</h2>
+            <h2>Let a Sahaayi call you.</h2>
             <p>Enter your number and our AI voice agent will call you in a few minutes. Explain your problem naturally — no forms first.</p>
             <button type="button" className="voice-callback-button" onClick={() => setCallbackOpen(true)}>Request a voice callback <span>→</span></button>
           </div>
