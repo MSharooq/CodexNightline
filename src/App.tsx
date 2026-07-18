@@ -1,4 +1,5 @@
-import { FormEvent, useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
+import type { FormEvent } from 'react'
 import { setBrowserPageLanguage } from './browserTranslation'
 
 type Page = 'home' | 'cases' | 'documents' | 'profile' | 'dashboard'
@@ -153,20 +154,6 @@ function resultForIssue(issue: Issue, statement = ''): HelpResult {
   return results[issue]
 }
 
-function detectIssue(text: string): Issue {
-  const value = text.toLowerCase()
-  if (/(wage|paid|payment|salary|contractor)/.test(value)) return 'unpaid_wages'
-  if (/(injur|hurt|hospital|ill|pain|accident)/.test(value)) return 'injury'
-  if (/(register|registration|athidhi|guest)/.test(value)) return 'registration'
-  if (/(document|id|passport|aadhar|identity)/.test(value)) return 'documents'
-  if (/(benefit|scheme|welfare|support)/.test(value)) return 'benefits'
-  return 'other'
-}
-
-function isIssue(value: unknown): value is Issue {
-  return ['unpaid_wages', 'injury', 'registration', 'documents', 'hospital', 'benefits', 'other'].includes(String(value))
-}
-
 function issueIcon(issue: Issue) {
   return ({ unpaid_wages: '₹', injury: '✚', registration: '⌁', documents: '▤', hospital: '⌖', benefits: '✦', other: '●' })[issue]
 }
@@ -176,12 +163,10 @@ function App() {
   const [language, setLanguage] = useState(getInitialLanguage)
   const [isLanguageOpen, setLanguageOpen] = useState(false)
   const [isListening, setListening] = useState(false)
-  const [message, setMessage] = useState('')
   const [result, setResult] = useState<HelpResult | null>(null)
   const [showCaseSheet, setShowCaseSheet] = useState(false)
   const [caseDraft, setCaseDraft] = useState<HelpResult | null>(null)
   const [isCallbackOpen, setCallbackOpen] = useState(false)
-  const [isThinking, setThinking] = useState(false)
   const [isChatOpen, setChatOpen] = useState(false)
   const [cases, setCases] = useState(initialCases)
   const [toast, setToast] = useState('')
@@ -207,29 +192,6 @@ function App() {
 
     if (nextLanguage.name === 'English') {
       void setBrowserPageLanguage(nextLanguage.name)
-    }
-  }
-
-  const askForHelp = async (event: FormEvent) => {
-    event.preventDefault()
-    const trimmed = message.trim()
-    if (!trimmed) return
-    setThinking(true)
-    setMessage('')
-    try {
-      const response = await fetch('/api/help', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: trimmed, language: language.name }),
-      })
-      const data = await response.json() as { issueType?: unknown; answer?: unknown }
-      const issue = isIssue(data.issueType) ? data.issueType : detectIssue(trimmed)
-      const fallback = resultForIssue(issue, trimmed)
-      setResult({ ...fallback, summary: typeof data.answer === 'string' && data.answer.trim() ? data.answer : fallback.summary })
-    } catch {
-      setResult(resultForIssue(detectIssue(trimmed), trimmed))
-    } finally {
-      setThinking(false)
     }
   }
 
@@ -281,52 +243,45 @@ function App() {
       <main className="home-page">
         <section className="welcome-row">
           <div>
-            <p className="eyebrow hero-eyebrow"><span /> A worker-first guide for Kerala</p>
-            <h1>Support that <em>speaks</em><br />your language.</h1>
-            <p className="subtle">Tell Sahaayi what happened in {language.name}. We’ll help you find the next real step — without the paperwork maze.</p>
+            <p className="eyebrow hero-eyebrow"><span /> Voice AI support for workers in Kerala</p>
+            <h1>Talk. Get help.<br /><em>In your language.</em></h1>
+            <p className="subtle">Sahaayi is your voice-first AI helper for wages, health, documents, registration and benefits — in {language.name}.</p>
           </div>
           <div className="welcome-orbit" aria-hidden="true"><span className="orbit-sun" /><span className="orbit-face">✦</span><span className="orbit-word">സ</span></div>
         </section>
 
         <section className={`voice-card ${isListening ? 'is-listening' : ''}`} aria-live="polite">
           <div className="voice-copy">
-            <span className="small-pill"><span className="pulse-dot" />{isListening ? 'Listening now' : `Ready in ${language.name}`}</span>
-            <h2>{isListening ? 'Take your time. I’m here.' : 'Speak freely. We’ll find your way forward.'}</h2>
-            <p>{isListening ? '“My contractor has not paid me for two months.”' : 'No forms to understand first. Just explain what is happening in your own words.'}</p>
+            <span className="small-pill"><span className="pulse-dot" />{isListening ? 'Voice AI is listening' : `Voice AI ready in ${language.name}`}</span>
+            <h2>{isListening ? 'Take your time. I’m listening.' : 'Start with your voice.'}</h2>
+            <p>{isListening ? '“My contractor has not paid me for two months.”' : 'Say what happened naturally. Sahaayi understands the issue and guides you to the next real step.'}</p>
           </div>
-          <button className="voice-button" type="button" onClick={startDemoVoice} aria-label="Start voice help">
+          <button className="voice-button" type="button" onClick={startDemoVoice} aria-label="Start speaking with Sahaayi voice AI">
             <span className="mic-icon" aria-hidden="true" />
             <span className="voice-ring ring-one" />
             <span className="voice-ring ring-two" />
           </button>
           <div className="voice-foot">
-            <span>{isListening ? 'Understanding your words' : 'Tap the mic to start speaking'}</span>
-            <span className="privacy-note">✦ Your story stays yours</span>
+            <span className="voice-start-label">{isListening ? 'Understanding your words' : 'Tap the mic to start speaking'}</span>
+            <span className="privacy-note">✦ Voice-first. No forms first.</span>
           </div>
         </section>
 
         <section className="call-options" aria-label="Request a phone callback">
           <div className="call-options-copy">
             <span className="call-symbol">☎</span>
-            <div><span className="call-kicker">Voice callback</span><strong>Prefer to talk on the phone?</strong><p>A Sahaayi voice agent can call you in a few minutes.</p></div>
+            <div><span className="call-kicker">Voice AI callback</span><strong>Want Sahaayi to call you?</strong><p>Our voice AI agent will call you in a few minutes and speak your chosen language.</p></div>
           </div>
           <div className="call-options-actions">
-            <button type="button" onClick={() => setCallbackOpen(true)}>Request a call <span>→</span></button>
+            <button type="button" onClick={() => setCallbackOpen(true)}>Request voice call <span>→</span></button>
           </div>
         </section>
 
-        <form className="help-input" onSubmit={askForHelp}>
-          <label htmlFor="help-message">Rather type it out?</label>
-          <div>
-            <input
-              id="help-message"
-              value={message}
-              onChange={(event) => setMessage(event.target.value)}
-              placeholder="For example: My employer has my documents"
-            />
-            <button type="submit" aria-label="Ask Sahaayi" disabled={isThinking}>{isThinking ? '…' : '↑'}</button>
-          </div>
-        </form>
+        <section className="chat-spotlight" aria-label="Chat with Sahaayi AI">
+          <div className="chat-spotlight-icon">✦</div>
+          <div className="chat-spotlight-copy"><span className="chat-kicker">Text AI assistant</span><h2>Prefer typing? Chat with Sahaayi.</h2><p>Ask a question, get a simple answer, then take your next step.</p></div>
+          <button type="button" onClick={() => setChatOpen(true)}>Open AI chat <span>→</span></button>
+        </section>
 
         <section className="quick-section">
           <div className="section-heading">
@@ -374,7 +329,7 @@ function App() {
         <button type="button" className="brand" onClick={() => setPage('home')} aria-label="Sahaayi home"><span className="brand-mark">s</span><span>Sahaayi</span></button>
         <div className="top-actions">
           <div className="language-menu notranslate" translate="no">
-            <button className="language-switch" type="button" onClick={() => setLanguageOpen((open) => !open)}>{language.label}<span className="hide-on-small"> {language.name}</span><span>⌄</span></button>
+            <button className="language-switch" type="button" onClick={() => setLanguageOpen((open) => !open)}><span className="language-icon">◎</span><span className="language-copy"><small>Language</small><strong>{language.label}<span className="hide-on-small"> · {language.name}</span></strong></span><span>⌄</span></button>
             {isLanguageOpen && <div className="language-popover">{languages.map((item) => <button type="button" key={item.name} onClick={() => changeLanguage(item)}><span>{item.label}</span>{item.name === language.name && <span>✓</span>}<small>{item.name}</small></button>)}</div>}
           </div>
           <button type="button" className="emergency-link" onClick={() => setResult(resultForIssue('injury'))}><span>✚</span><span className="hide-on-small">Urgent help</span></button>
