@@ -13,6 +13,13 @@ body { margin: 0; min-width: 320px; background: #f7f7f5; }
 button, input { font: inherit; }
 button { cursor: pointer; }
 
+/* The translation control is operated by Sahaayi's language selector. */
+.browser-translate-root,
+.goog-te-banner-frame.skiptranslate,
+#goog-gt-tt,
+.goog-te-balloon-frame { display: none !important; }
+body { top: 0 !important; }
+
 .app-shell { min-height: 100vh; padding-bottom: 84px; }
 .topbar { width: min(1200px, calc(100% - 32px)); height: 76px; margin: auto; display: flex; align-items: center; justify-content: space-between; position: relative; z-index: 5; }
 .brand { border: 0; background: transparent; display: inline-flex; align-items: center; gap: 9px; font-size: 21px; font-weight: 700; letter-spacing: -0.05em; color: #191919; padding: 0; }

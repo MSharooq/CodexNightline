@@ -1,4 +1,5 @@
-import { FormEvent, useMemo, useState } from 'react'
+import { FormEvent, useEffect, useMemo, useState } from 'react'
+import { setBrowserPageLanguage } from './browserTranslation'
 
 type Page = 'home' | 'cases' | 'documents' | 'profile' | 'dashboard'
 type Issue = 'unpaid_wages' | 'injury' | 'registration' | 'documents' | 'hospital' | 'benefits' | 'other'
@@ -42,6 +43,12 @@ const languages = [
   { label: 'తెలుగు', name: 'Telugu' },
   { label: 'मराठी', name: 'Marathi' },
 ]
+
+function getInitialLanguage() {
+  if (typeof window === 'undefined') return languages[0]
+  const savedLanguage = window.localStorage.getItem('sahaayi-preferred-language')
+  return languages.find((item) => item.name === savedLanguage) ?? languages[0]
+}
 
 const initialCases: CaseItem[] = [
   {
@@ -166,7 +173,7 @@ function issueIcon(issue: Issue) {
 
 function App() {
   const [page, setPage] = useState<Page>('home')
-  const [language, setLanguage] = useState(languages[0])
+  const [language, setLanguage] = useState(getInitialLanguage)
   const [isLanguageOpen, setLanguageOpen] = useState(false)
   const [isListening, setListening] = useState(false)
   const [message, setMessage] = useState('')
@@ -179,11 +186,28 @@ function App() {
   const [cases, setCases] = useState(initialCases)
   const [toast, setToast] = useState('')
 
+  useEffect(() => {
+    if (language.name === 'English') return
+    void setBrowserPageLanguage(language.name).catch(() => {
+      setToast('Website translation could not load. Sahaayi will still reply in your selected language.')
+    })
+  }, [language.name])
+
   const caseCount = useMemo(() => cases.filter((item) => item.status !== 'Resolved').length, [cases])
 
   const notify = (text: string) => {
     setToast(text)
     window.setTimeout(() => setToast(''), 3200)
+  }
+
+  const changeLanguage = (nextLanguage: (typeof languages)[number]) => {
+    window.localStorage.setItem('sahaayi-preferred-language', nextLanguage.name)
+    setLanguage(nextLanguage)
+    setLanguageOpen(false)
+
+    if (nextLanguage.name === 'English') {
+      void setBrowserPageLanguage(nextLanguage.name)
+    }
   }
 
   const askForHelp = async (event: FormEvent) => {
@@ -349,9 +373,9 @@ function App() {
       <header className="topbar">
         <button type="button" className="brand" onClick={() => setPage('home')} aria-label="Sahaayi home"><span className="brand-mark">s</span><span>Sahaayi</span></button>
         <div className="top-actions">
-          <div className="language-menu">
+          <div className="language-menu notranslate" translate="no">
             <button className="language-switch" type="button" onClick={() => setLanguageOpen((open) => !open)}>{language.label}<span className="hide-on-small"> {language.name}</span><span>⌄</span></button>
-            {isLanguageOpen && <div className="language-popover">{languages.map((item) => <button type="button" key={item.name} onClick={() => { setLanguage(item); setLanguageOpen(false) }}><span>{item.label}</span>{item.name === language.name && <span>✓</span>}<small>{item.name}</small></button>)}</div>}
+            {isLanguageOpen && <div className="language-popover">{languages.map((item) => <button type="button" key={item.name} onClick={() => changeLanguage(item)}><span>{item.label}</span>{item.name === language.name && <span>✓</span>}<small>{item.name}</small></button>)}</div>}
           </div>
           <button type="button" className="emergency-link" onClick={() => setResult(resultForIssue('injury'))}><span>✚</span><span className="hide-on-small">Urgent help</span></button>
         </div>
@@ -377,6 +401,7 @@ function App() {
       {page !== 'dashboard' && <button type="button" className="chat-launcher" onClick={() => setChatOpen(true)} aria-label="Open Sahaayi chat"><span>✦</span><strong>Chat with Sahaayi</strong></button>}
       {isChatOpen && <Chatbot language={language.name} onClose={() => setChatOpen(false)} onRequestCallback={() => { setChatOpen(false); setCallbackOpen(true) }} />}
       {toast && <div className="toast" role="status">✓ {toast}</div>}
+      <div id="sahaayi-google-translate" className="browser-translate-root" aria-hidden="true" />
     </div>
   )
 }
