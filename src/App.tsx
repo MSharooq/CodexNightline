@@ -162,7 +162,6 @@ function App() {
   const [page, setPage] = useState<Page>('home')
   const [language, setLanguage] = useState(getInitialLanguage)
   const [isLanguageOpen, setLanguageOpen] = useState(false)
-  const [isListening, setListening] = useState(false)
   const [result, setResult] = useState<HelpResult | null>(null)
   const [showCaseSheet, setShowCaseSheet] = useState(false)
   const [caseDraft, setCaseDraft] = useState<HelpResult | null>(null)
@@ -193,16 +192,6 @@ function App() {
     if (nextLanguage.name === 'English') {
       void setBrowserPageLanguage(nextLanguage.name)
     }
-  }
-
-  const startDemoVoice = () => {
-    if (isListening) return
-    setListening(true)
-    window.setTimeout(() => {
-      const demoStatement = 'My contractor has not paid me for two months.'
-      setResult(resultForIssue('unpaid_wages', demoStatement))
-      setListening(false)
-    }, 1550)
   }
 
   const openQuickAction = (issue: Issue) => setResult(resultForIssue(issue))
@@ -245,42 +234,29 @@ function App() {
           <div>
             <p className="eyebrow hero-eyebrow"><span /> Voice AI support for workers in Kerala</p>
             <h1>Talk. Get help.<br /><em>In your language.</em></h1>
-            <p className="subtle">Sahaayi is your voice-first AI helper for wages, health, documents, registration and benefits — in {language.name}.</p>
+            <p className="subtle">Choose a callback from Sahaayi’s voice agent or message the chatbot for help with wages, health, documents, registration and benefits.</p>
           </div>
           <div className="welcome-orbit" aria-hidden="true"><span className="orbit-sun" /><span className="orbit-face">✦</span><span className="orbit-word">സ</span></div>
         </section>
 
-        <section className={`voice-card ${isListening ? 'is-listening' : ''}`} aria-live="polite">
+        <section className="voice-card callback-hero" aria-label="Sahaayi voice agent callback">
           <div className="voice-copy">
-            <span className="small-pill"><span className="pulse-dot" />{isListening ? 'Voice AI is listening' : `Voice AI ready in ${language.name}`}</span>
-            <h2>{isListening ? 'Take your time. I’m listening.' : 'Start with your voice.'}</h2>
-            <p>{isListening ? '“My contractor has not paid me for two months.”' : 'Say what happened naturally. Sahaayi understands the issue and guides you to the next real step.'}</p>
+            <span className="small-pill"><span className="pulse-dot" />Voice agent callback · {language.name}</span>
+            <h2>Let Sahaayi call you.</h2>
+            <p>Enter your number and our AI voice agent will call you in a few minutes. Explain your problem naturally — no forms first.</p>
+            <button type="button" className="voice-callback-button" onClick={() => setCallbackOpen(true)}>Request a voice callback <span>→</span></button>
           </div>
-          <button className="voice-button" type="button" onClick={startDemoVoice} aria-label="Start speaking with Sahaayi voice AI">
-            <span className="mic-icon" aria-hidden="true" />
-            <span className="voice-ring ring-one" />
-            <span className="voice-ring ring-two" />
-          </button>
+          <div className="callback-agent-orb" aria-hidden="true"><span>☎</span><i /><b /></div>
           <div className="voice-foot">
-            <span className="voice-start-label">{isListening ? 'Understanding your words' : 'Tap the mic to start speaking'}</span>
-            <span className="privacy-note">✦ Voice-first. No forms first.</span>
-          </div>
-        </section>
-
-        <section className="call-options" aria-label="Request a phone callback">
-          <div className="call-options-copy">
-            <span className="call-symbol">☎</span>
-            <div><span className="call-kicker">Voice AI callback</span><strong>Want Sahaayi to call you?</strong><p>Our voice AI agent will call you in a few minutes and speak your chosen language.</p></div>
-          </div>
-          <div className="call-options-actions">
-            <button type="button" onClick={() => setCallbackOpen(true)}>Request voice call <span>→</span></button>
+            <span className="voice-start-label">A phone call in the language you choose</span>
+            <span className="privacy-note">✦ Private, patient and simple</span>
           </div>
         </section>
 
         <section className="chat-spotlight" aria-label="Chat with Sahaayi AI">
           <div className="chat-spotlight-icon">✦</div>
-          <div className="chat-spotlight-copy"><span className="chat-kicker">Text AI assistant</span><h2>Prefer typing? Chat with Sahaayi.</h2><p>Ask a question, get a simple answer, then take your next step.</p></div>
-          <button type="button" onClick={() => setChatOpen(true)}>Open AI chat <span>→</span></button>
+          <div className="chat-spotlight-copy"><span className="chat-kicker">Sahaayi chatbot</span><h2>Prefer typing? Use the chatbot.</h2><p>Ask a question, get a simple answer, then take your next step.</p></div>
+          <button type="button" onClick={() => setChatOpen(true)}>Open chatbot <span>→</span></button>
         </section>
 
         <section className="quick-section">
