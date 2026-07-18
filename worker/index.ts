@@ -239,7 +239,7 @@ export default {
       }
 
       return json({
-        message: 'Your callback has been requested. Please keep this phone nearby.',
+        message: 'Your callback has been requested. Sahaayi’s voice agent will call you in a few minutes — please keep this phone nearby.',
         executionId: bolnaData.execution_id,
         status: bolnaData.status ?? 'queued',
       }, 202)

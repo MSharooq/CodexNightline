@@ -284,7 +284,7 @@ function App() {
         <section className="call-options" aria-label="Request a phone callback">
           <div className="call-options-copy">
             <span className="call-symbol">☎</span>
-            <div><strong>Sahaayi can call you</strong><p>Enter a number you can answer and the voice assistant will call you back.</p></div>
+            <div><strong>Sahaayi can call you</strong><p>Enter a number you can answer. A voice agent will call you in a few minutes.</p></div>
           </div>
           <div className="call-options-actions">
             <button type="button" onClick={() => setCallbackOpen(true)}>Request a call <span>→</span></button>
@@ -460,7 +460,7 @@ function CallbackSheet({ language, onClose, onSuccess }: { language: string; onC
       })
       const data = await response.json() as { error?: string; message?: string }
       if (!response.ok) throw new Error(data.error ?? 'We could not request a callback right now.')
-      onSuccess(data.message ?? 'Sahaayi will call you shortly.')
+      onSuccess(data.message ?? 'Sahaayi’s voice agent will call you in a few minutes.')
     } catch (requestError) {
       setError(requestError instanceof Error ? requestError.message : 'We could not request a callback right now.')
     } finally {
@@ -475,7 +475,7 @@ function CallbackSheet({ language, onClose, onSuccess }: { language: string; onC
       <div className="callback-icon">☎</div>
       <p className="eyebrow">Sahaayi can call you</p>
       <h2 id="callback-title">Request a callback</h2>
-      <p className="result-summary">Choose a language and enter a number you can answer. Sahaayi will call and speak in your chosen language.</p>
+      <p className="result-summary">Choose a language and enter a number you can answer. Sahaayi’s voice agent will call you in a few minutes and speak in your chosen language.</p>
       <form className="callback-form" onSubmit={requestCallback}>
         <label htmlFor="callback-language">Preferred language</label>
         <select id="callback-language" value={callbackLanguage} onChange={(event) => setCallbackLanguage(event.target.value)}>
