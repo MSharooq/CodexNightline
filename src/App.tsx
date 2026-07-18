@@ -261,7 +261,7 @@ function App() {
             <p className="intro-summary">Sahaayi is a voice and chat helper for migrant workers living and working in Kerala. Understand benefits, solve workplace problems and find the right official or community support.</p>
             <label className="hero-language-select"><span>Start in your language</span><select value={language.name} onChange={(event) => { const selected = languages.find((item) => item.name === event.target.value); if (selected) changeLanguage(selected) }}>{languages.map((item) => <option key={item.name} value={item.name}>{item.label} · {item.name}</option>)}</select></label>
             <div className="intro-actions">
-              <button type="button" className="intro-primary-action" onClick={() => setCallbackOpen(true)}>Request a voice callback <span>→</span></button>
+              <div className="intro-callback-action"><button type="button" className="intro-primary-action" onClick={() => setCallbackOpen(true)}>Request a voice callback <span>→</span></button><small>We’ll call the number you share in a few minutes.</small></div>
               <button type="button" className="intro-secondary-action" onClick={() => setChatOpen(true)}>Chat with Sahaayi</button>
             </div>
             <ul className="intro-proof" aria-label="Ways Sahaayi can help"><li><span>✓</span> Wages &amp; workplace safety</li><li><span>✓</span> Documents &amp; registration</li><li><span>✓</span> Benefits &amp; nearby services</li></ul>
