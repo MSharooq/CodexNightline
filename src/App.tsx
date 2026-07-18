@@ -254,13 +254,23 @@ function App() {
 
     return (
       <main className="home-page">
-        <section className="welcome-row">
-          <div>
-            <p className="eyebrow hero-eyebrow"><span /> Voice AI support for workers in Kerala</p>
-            <h1>Talk. Get help.<br /><em>In your language.</em></h1>
-            <p className="subtle">Choose a callback from Sahaayi’s voice agent or message the chatbot for help with wages, health, documents, registration and benefits.</p>
+        <section className="intro-hero" aria-labelledby="intro-title">
+          <div className="intro-copy">
+            <p className="eyebrow hero-eyebrow"><span /> A multilingual helper for migrant workers in Kerala</p>
+            <h1 id="intro-title">Get the help you need.<br /><em>Without knowing where to start.</em></h1>
+            <p className="intro-summary">Sahaayi is a voice and chat assistant that helps migrant workers understand benefits, solve workplace problems and reach the right support — in the language they speak.</p>
+            <div className="intro-actions">
+              <button type="button" className="intro-primary-action" onClick={() => setCallbackOpen(true)}>Request a voice callback <span>→</span></button>
+              <button type="button" className="intro-secondary-action" onClick={() => setChatOpen(true)}>Chat with Sahaayi</button>
+            </div>
+            <ul className="intro-proof" aria-label="Ways Sahaayi can help"><li><span>✓</span> Wages &amp; workplace safety</li><li><span>✓</span> Documents &amp; registration</li><li><span>✓</span> Benefits &amp; nearby services</li></ul>
           </div>
-          <div className="welcome-orbit" aria-hidden="true"><span className="orbit-sun" /><span className="orbit-face">✦</span><span className="orbit-word">സ</span></div>
+          <div className="intro-images" aria-label="Construction workers at work">
+            <img className="intro-main-photo" src="/images/worker-hero.jpg" alt="Construction workers at a job site in India" />
+            <img className="intro-small-photo" src="/images/worker-sunset.jpg" alt="Construction workers at sunset" loading="lazy" />
+            <div className="intro-language-card"><span>◎</span><div><small>Speak naturally in</small><strong>{language.label} · {language.name}</strong></div></div>
+            <p className="photo-credit">Photos: Pexels</p>
+          </div>
         </section>
 
         <section className="voice-card callback-hero" aria-label="Sahaayi voice agent callback">
