@@ -31,6 +31,7 @@ type ChatMessage = {
 }
 
 const languages = [
+  { label: 'English', name: 'English' },
   { label: 'বাংলা', name: 'Bengali' },
   { label: 'हिन्दी', name: 'Hindi' },
   { label: 'മലയാളം', name: 'Malayalam' },
@@ -40,7 +41,6 @@ const languages = [
   { label: 'ಕನ್ನಡ', name: 'Kannada' },
   { label: 'తెలుగు', name: 'Telugu' },
   { label: 'मराठी', name: 'Marathi' },
-  { label: 'English', name: 'English' },
 ]
 
 const initialCases: CaseItem[] = [

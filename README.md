@@ -51,8 +51,9 @@ Do not commit `.dev.vars`. For Cloudflare deployment, add secrets with `npx wran
 ## Bolna connection plan
 
 1. Create a phone-call agent in Bolna and configure its supported languages.
-2. Keep the agent prompt strictly scoped: ask one question at a time, do not invent eligibility or legal outcomes, and flag urgent injuries immediately.
-3. Add a custom function that calls `POST /api/bolna/case` with this shape. Configure the custom function’s Bearer token to match `BOLNA_FUNCTION_TOKEN`:
+2. Add every language offered by Sahaayi to the Bolna agent, then add this to the top of its main prompt: `The worker selected {preferred_language} ({preferred_language_code}). {language_instruction} Start the call in the selected language. Do not default to English.` Bolna replaces these callback variables at call time.
+3. Keep the agent prompt strictly scoped: ask one question at a time, do not invent eligibility or legal outcomes, and flag urgent injuries immediately.
+4. Add a custom function that calls `POST /api/bolna/case` with this shape. Configure the custom function’s Bearer token to match `BOLNA_FUNCTION_TOKEN`:
 
 ```json
 {
@@ -64,8 +65,8 @@ Do not commit `.dev.vars`. For Cloudflare deployment, add secrets with `npx wran
 }
 ```
 
-4. Replace the demo response in `worker/index.ts` with a Supabase insert after validating the custom-function Bearer token.
-5. Pass only a short structured summary to a caseworker. Keep original audio/evidence access consent-based.
+5. Replace the demo response in `worker/index.ts` with a Supabase insert after validating the custom-function Bearer token.
+6. Pass only a short structured summary to a caseworker. Keep original audio/evidence access consent-based.
 
 ## Phone-call setup
 

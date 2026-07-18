@@ -29,6 +29,19 @@ type HelpPayload = {
   history?: ChatHistoryItem[]
 }
 
+const languageCodes: Record<string, string> = {
+  English: 'en',
+  Bengali: 'bn',
+  Hindi: 'hi',
+  Malayalam: 'ml',
+  Tamil: 'ta',
+  Odia: 'or',
+  Assamese: 'as',
+  Kannada: 'kn',
+  Telugu: 'te',
+  Marathi: 'mr',
+}
+
 type ChatHistoryItem = {
   role?: string
   content?: string
@@ -167,6 +180,7 @@ export default {
     if (url.pathname === '/api/callback' && request.method === 'POST') {
       const payload = await request.json<CallbackPayload>()
       const phoneNumber = normaliseIndianPhoneNumber(payload.phoneNumber ?? '')
+      const preferredLanguage = payload.language?.trim().slice(0, 40) || 'English'
       if (!phoneNumber) return json({ error: 'Enter a valid Indian phone number, for example +91 98765 43210.' }, 400)
 
       if (!env.BOLNA_API_KEY || !env.BOLNA_AGENT_ID) {
@@ -179,7 +193,9 @@ export default {
         ...(env.BOLNA_FROM_PHONE_NUMBER ? { from_phone_number: env.BOLNA_FROM_PHONE_NUMBER } : {}),
         user_data: {
           caller_name: payload.name?.trim().slice(0, 80) || 'Worker',
-          preferred_language: payload.language?.trim().slice(0, 40) || 'English',
+          preferred_language: preferredLanguage,
+          preferred_language_code: languageCodes[preferredLanguage] ?? 'en',
+          language_instruction: `Speak only in ${preferredLanguage}, unless the worker asks to change language.`,
           entry_point: 'sahaayi_callback',
         },
       }
