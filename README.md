@@ -1,8 +1,20 @@
 # Sahaayi
 
-Sahaayi is a multilingual, voice-first support navigator for migrant workers in Kerala.
+**[Open the live demo →](https://sahaayi.sharooqlavanya04.workers.dev)**
+
+Sahaayi is a multilingual, voice-first support navigator for migrant workers living and working in Kerala.
 
 It helps a worker explain a need in their own language, understand the right next step, prepare for an existing service or benefit, and create a reviewed support request when escalation is needed.
+
+## Live demo
+
+The judge-ready deployment is live at [sahaayi.sharooqlavanya04.workers.dev](https://sahaayi.sharooqlavanya04.workers.dev).
+
+- Request a callback from the Sahaayi Bolna voice agent in a chosen language.
+- Chat with Sahaayi for practical, plain-language guidance.
+- Explore the support journeys, case tracking, document flow, and caseworker dashboard.
+
+For safety, the demo does not place a callback unless a user enters a number and explicitly consents. Case, document, and dashboard records use local sample data until a secure production database is connected.
 
 ## What is working now
 
@@ -12,7 +24,9 @@ It helps a worker explain a need in their own language, understand the right nex
 - A callback-request entry point that lets the Bolna voice agent call the worker, with safe demo fallbacks until it is configured
 - Demo case status tracking and a caseworker dashboard
 - Cloudflare Worker API routes for health checks, a Bolna case handoff, and service-directory data
-- Progressive Web App metadata and offline shell
+- Trust and safety guidance explaining what Sahaayi can and cannot do
+- Privacy and emergency-service notices in the site footer
+- Progressive Web App metadata, branded coral icon, and a deploy-versioned offline cache
 
 The app intentionally uses local demo data until external credentials are configured. It will run and present well without any API keys.
 
@@ -80,6 +94,8 @@ Before deploying, add `BOLNA_API_KEY` and `BOLNA_AGENT_ID` as Cloudflare secrets
 
 Sahaayi is an access and support layer, not a replacement for Kerala government systems. Any future ATHIDHI connection should be presented as an approved, API-based and consent-driven service handoff—not direct access to a government database.
 
+Sahaayi is not an emergency, medical, or legal service. For immediate danger or a serious injury, seek urgent local help first.
+
 ## Verify before deploying
 
 ```bash
@@ -95,3 +111,19 @@ After logging in to Cloudflare and adding the required secrets:
 ```bash
 npm run deploy
 ```
+
+Wrangler prints the public Worker URL after deployment. This project is currently deployed at [https://sahaayi.sharooqlavanya04.workers.dev](https://sahaayi.sharooqlavanya04.workers.dev).
+
+### Required production secrets
+
+```bash
+npx wrangler secret put OPENAI_API_KEY
+npx wrangler secret put BOLNA_API_KEY
+npx wrangler secret put BOLNA_AGENT_ID
+```
+
+Add `BOLNA_FROM_PHONE_NUMBER` only if the configured Bolna agent requires an explicit caller ID. Secrets are encrypted in Cloudflare and must never be committed to Git.
+
+### Cache updates
+
+Every production build registers the service worker with a unique version and clears prior Sahaayi caches. If an already-open browser still shows an older deployment, perform one hard refresh.
