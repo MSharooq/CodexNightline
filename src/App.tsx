@@ -257,34 +257,34 @@ function App() {
       <main className="home-page">
         <section className="welcome-row">
           <div>
-            <p className="eyebrow">Your worker helper</p>
-            <h1>How can I help you today?</h1>
-            <p className="subtle">Speak or write in {language.name}. We will help you find the next right step.</p>
+            <p className="eyebrow hero-eyebrow"><span /> A worker-first guide for Kerala</p>
+            <h1>Support that <em>speaks</em><br />your language.</h1>
+            <p className="subtle">Tell Sahaayi what happened in {language.name}. We’ll help you find the next real step — without the paperwork maze.</p>
           </div>
-          <div className="welcome-orbit" aria-hidden="true"><span>✦</span></div>
+          <div className="welcome-orbit" aria-hidden="true"><span className="orbit-sun" /><span className="orbit-face">✦</span><span className="orbit-word">സ</span></div>
         </section>
 
         <section className={`voice-card ${isListening ? 'is-listening' : ''}`} aria-live="polite">
           <div className="voice-copy">
-            <span className="small-pill">{isListening ? 'Listening…' : `Speaking in ${language.name}`}</span>
-            <h2>{isListening ? 'Take your time. I am listening.' : 'Tell Sahaayi what happened.'}</h2>
-            <p>{isListening ? '“My contractor has not paid me for two months.”' : 'You do not need to know which department, benefit, or form to use.'}</p>
+            <span className="small-pill"><span className="pulse-dot" />{isListening ? 'Listening now' : `Ready in ${language.name}`}</span>
+            <h2>{isListening ? 'Take your time. I’m here.' : 'Speak freely. We’ll find your way forward.'}</h2>
+            <p>{isListening ? '“My contractor has not paid me for two months.”' : 'No forms to understand first. Just explain what is happening in your own words.'}</p>
           </div>
           <button className="voice-button" type="button" onClick={startDemoVoice} aria-label="Start voice help">
-            <span className="mic-icon">⌁</span>
+            <span className="mic-icon" aria-hidden="true" />
             <span className="voice-ring ring-one" />
             <span className="voice-ring ring-two" />
           </button>
           <div className="voice-foot">
-            <span>{isListening ? 'Understanding your words' : 'Tap to try a voice example'}</span>
-            <span className="privacy-note">◉ Private by default</span>
+            <span>{isListening ? 'Understanding your words' : 'Tap the mic to start speaking'}</span>
+            <span className="privacy-note">✦ Your story stays yours</span>
           </div>
         </section>
 
         <section className="call-options" aria-label="Request a phone callback">
           <div className="call-options-copy">
             <span className="call-symbol">☎</span>
-            <div><strong>Sahaayi can call you</strong><p>Enter a number you can answer. A voice agent will call you in a few minutes.</p></div>
+            <div><span className="call-kicker">Voice callback</span><strong>Prefer to talk on the phone?</strong><p>A Sahaayi voice agent can call you in a few minutes.</p></div>
           </div>
           <div className="call-options-actions">
             <button type="button" onClick={() => setCallbackOpen(true)}>Request a call <span>→</span></button>
@@ -292,13 +292,13 @@ function App() {
         </section>
 
         <form className="help-input" onSubmit={askForHelp}>
-          <label htmlFor="help-message">Or type what you need help with</label>
+          <label htmlFor="help-message">Rather type it out?</label>
           <div>
             <input
               id="help-message"
               value={message}
               onChange={(event) => setMessage(event.target.value)}
-              placeholder="For example: I need a hospital near me"
+              placeholder="For example: My employer has my documents"
             />
             <button type="submit" aria-label="Ask Sahaayi" disabled={isThinking}>{isThinking ? '…' : '↑'}</button>
           </div>
@@ -307,8 +307,8 @@ function App() {
         <section className="quick-section">
           <div className="section-heading">
             <div>
-              <p className="eyebrow">Start here</p>
-              <h2>What do you need?</h2>
+              <p className="eyebrow">Pick a starting point</p>
+              <h2>What’s on your mind today?</h2>
             </div>
             <span className="language-chip">{language.label} {language.name}</span>
           </div>
@@ -327,7 +327,7 @@ function App() {
           <article className="support-card">
             <div className="support-card-icon">⌂</div>
             <p className="eyebrow">Nearby help</p>
-            <h2>Find a verified support centre</h2>
+            <h2>Find help near your work or home</h2>
             <p>Hospitals, help desks, and worker-support organisations near your area.</p>
             <button type="button" className="text-button" onClick={() => openQuickAction('hospital')}>Find support near me <span>→</span></button>
           </article>
