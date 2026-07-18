@@ -48,6 +48,13 @@ type SupportShortcut = {
   tone: 'emergency' | 'health' | 'support'
 }
 
+type SupportOrganisation = {
+  name: string
+  detail: string
+  href: string
+  action: string
+}
+
 const languages = [
   { label: 'English', name: 'English' },
   { label: 'বাংলা', name: 'Bengali' },
@@ -117,6 +124,21 @@ const keralaShortcuts: Record<string, SupportShortcut> = {
   child: { name: 'Child Helpline', number: '1098', detail: 'Support when a child may be at risk', tone: 'emergency' },
   women: { name: 'Women Helpline', number: '181', detail: 'Support for women seeking help or safety guidance', tone: 'emergency' },
 }
+
+const localSupportOrganisations: SupportOrganisation[] = [
+  {
+    name: 'Kerala Migrant Workers Union',
+    detail: 'Worker-rights, wage, safety, documentation and welfare support across Kerala.',
+    href: 'https://www.migrantworkers.in/',
+    action: 'Visit website',
+  },
+  {
+    name: 'Kerala State Legal Services Authority',
+    detail: 'Official Kerala legal-aid service. Industrial workmen may be eligible for free legal aid.',
+    href: 'https://kerala.nalsa.gov.in/legal-aid/',
+    action: 'Learn about legal aid',
+  },
+]
 
 function shortcutsForIssue(issue: Issue): SupportShortcut[] {
   const shortcutKeys: Partial<Record<Issue, Array<keyof typeof keralaShortcuts>>> = {
@@ -432,6 +454,7 @@ function App() {
       {selectedCase && <CaseDetailSheet item={selectedCase} onClose={() => setSelectedCase(null)} onAskSahaayi={() => { setSelectedCase(null); setChatOpen(true) }} />}
       {showCaseSheet && <CaseSheet result={caseDraft} onClose={() => { setShowCaseSheet(false); setCaseDraft(null) }} onCreate={createCase} />}
       {isCallbackOpen && <CallbackSheet language={language.name} onClose={() => setCallbackOpen(false)} onSuccess={(message) => { setCallbackOpen(false); notify(message) }} />}
+      {page !== 'dashboard' && <button type="button" className="call-launcher" onClick={() => { setChatOpen(false); setCallbackOpen(true) }} aria-label="Request a call from Sahaayi"><span>☎</span><strong>Call Sahaayi</strong></button>}
       {page !== 'dashboard' && <button type="button" className="chat-launcher" onClick={() => setChatOpen(true)} aria-label="Open Sahaayi chat"><span>✦</span><strong>Chat with Sahaayi</strong></button>}
       {page !== 'dashboard' && <button type="button" className="quick-help-launcher" onClick={() => setQuickHelpOpen(true)} aria-label="Open Kerala quick help"><span>☎</span><strong>Quick Help</strong></button>}
       {isChatOpen && <Chatbot language={language.name} onClose={() => setChatOpen(false)} onRequestCallback={() => { setChatOpen(false); setCallbackOpen(true) }} />}
@@ -585,6 +608,17 @@ function KeralaSupportShortcuts({ shortcuts, compact = false }: { shortcuts: Sup
   </section>
 }
 
+function LocalSupportOrganisations({ organisations }: { organisations: SupportOrganisation[] }) {
+  return <section className="local-organisations" aria-label="Local Kerala support organisations">
+    <p className="shortcut-heading"><span>⌂</span> Local support organisations</p>
+    <div className="organisation-list">{organisations.map((organisation) => <a key={organisation.name} className="organisation-card" href={organisation.href} target="_blank" rel="noreferrer">
+      <span className="organisation-copy"><strong>{organisation.name}</strong><small>{organisation.detail}</small></span>
+      <span className="organisation-action">{organisation.action} <b>↗</b></span>
+    </a>)}</div>
+    <p className="organisation-note">These are independent resources, not Sahaayi partners. Check the organisation’s website before sharing personal details.</p>
+  </section>
+}
+
 function QuickHelpSheet({ onClose }: { onClose: () => void }) {
   return <div className="sheet-backdrop" role="presentation" onMouseDown={onClose}>
     <section className="help-sheet quick-help-sheet" role="dialog" aria-modal="true" aria-labelledby="quick-help-title" onMouseDown={(event) => event.stopPropagation()}>
@@ -595,6 +629,7 @@ function QuickHelpSheet({ onClose }: { onClose: () => void }) {
       <h2 id="quick-help-title">Quick Help</h2>
       <p className="result-summary">Choose the number that best matches what is happening. For immediate danger, call Emergency first.</p>
       <KeralaSupportShortcuts shortcuts={Object.values(keralaShortcuts)} />
+      <LocalSupportOrganisations organisations={localSupportOrganisations} />
     </section>
   </div>
 }
